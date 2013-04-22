@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:mvc="http://www.springframework.org/schema/mvc"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xmlns:flow="http://www.springframework.org/schema/webflow-config"
+xmlns:p="http://www.springframework.org/schema/p"
+xsi:schemaLocation="http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/webflow-config
+http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd
+http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <mvc:annotation-driven/>
+    
+    <context:annotation-config/> 
+    
+    <context:component-scan base-package="com.schoolquiz.controller"/>
+    
+    
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/schoolquiz"/>
+		<property name="username" value="root"/>
+		<property name="password" value="1997850"/>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/jsp" p:suffix=".jsp"/>
+	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+		    <props>
+		        <prop key="dialect">org.hibernate.dialect.HSQLDialect</prop>
+		        <prop key="hibernate.show_sql">true</prop>
+		        <prop key="hibernate.hbm2dll.auto">update</prop>
+		    </props>
+		</property>
+		<property name="annotatedClasses">
+			<list>
+				<value>com.schoolquiz.entity.Answer</value>
+				<value>com.schoolquiz.entity.Question</value>
+				<value>com.schoolquiz.entity.QuestionGroup</value>
+				<value>com.schoolquiz.entity.QuestionAnswer</value>
+				<value>com.schoolquiz.entity.UserAnswer</value>
+				<value>com.schoolquiz.entity.UserResult</value>
+				<value>com.schoolquiz.entity.admin.AdminUser</value>
+				<value>com.schoolquiz.entity.admin.AdminUserSession</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="quizDAO" class="com.schoolquiz.persistence.QuizDAOImpl"/>
+	
+	<bean id="quizService" class="com.schoolquiz.service.QuizServiceImpl"/>
+	
+	<bean id="adminUserDAO" class="com.schoolquiz.persistence.AdminDAOImpl"/>
+	
+	<bean id="adminService" class="com.schoolquiz.service.AdminUserServiceImpl"/>
+	
+	<bean id="txManager"
+        class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory">
+                <ref bean="sessionFactory" />
+        </property>
+    </bean>
+    
+
+    <tx:annotation-driven transaction-manager="txManager"/> 
+	
+</beans>

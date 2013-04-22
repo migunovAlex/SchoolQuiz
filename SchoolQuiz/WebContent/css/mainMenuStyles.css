@@ -1,0 +1,31 @@
+body{
+font-family:"Lucida Grande", arial, sans-serif;
+background: #FFFFFF;
+}
+ul{
+margin:20px;
+padding:60;
+}
+li{
+width:120px;
+height:70px;
+/*float:left;*/
+color:#191919;
+text-align:center;
+overflow:hidden;
+}
+a{
+color:#FFF;
+text-decoration:none;
+resize:none;
+}
+p{
+padding:0px 0px;
+resize:none;
+}
+.subtext{
+padding-top:0px;
+}
+/*÷ветовое решение меню*/
+.yellow{background:#FBC700;}
+.yellow2{background:#FBA100;}

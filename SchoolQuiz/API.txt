@@ -1,0 +1,54 @@
+URLs for POST requests
+
+
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/createUserResult
+передаваемые параметры:
+"name":"Vasiliy"
+создает сессию по имени. По этой сессии потом будут записываться ответы
+
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/createUserResult?name=Serg
+
+
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/getQuestionGroups
+передаваемые параметры:
+"userSession":"45WYW50V4A50X43K47U1"
+Получаем список групп вопросов
+
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/getQuestionGroups?userSession=7649U568SC2G87HJ0CRS
+
+
+http://127.0.0.1:8080/schoolQuiz/service/json/getQuestionForGroup
+передаваемые параметры:
+"userSession":""
+"questionGroup":"1"
+
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/getQuestionForGroup?userSession=7649U568SC2G87HJ0CRS&questionGroup=1
+
+
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/getQuestion
+передаваемые параметры:
+"userSession":""
+"questionId":""
+
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/getQuestion?userSession=7649U568SC2G87HJ0CRS&questionId=5
+
+
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/checkUserAnswer
+передаваемый параметры:
+"userSession":""
+"questionId":""
+"answerIds":""
+
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/checkUserAnswer?userSession=7649U568SC2G87HJ0CRS&questionId=4&answerIds=25,26,27
+
+
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult
+параметры:
+"userSession":""
+для проверки get запросом адрес например:
+http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult?userSession=X36UQX5P0G0Z33Q00IM8
