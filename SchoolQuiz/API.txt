@@ -53,5 +53,14 @@ http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult
 для проверки get запросом адрес например:
 http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult?userSession=X36UQX5P0G0Z33Q00IM8
 
+http://localhost:8090/schoolQuiz/quiz/pages/main?userSession=JQ8C62QW8NR792K33646
+Адрес главной страницы админки
 
-MASTER
+http://localhost:8090/schoolQuiz/quiz/pages/questionsInGroups?userSession=JQ8C62QW8NR792K33646
+адрес страницы с вопросами к группам
+
+http://localhost:8090/schoolQuiz/quiz/pages/answersPage?userSession=JQ8C62QW8NR792K33646
+адрес траницы с ответами
+
+http://localhost:8090/schoolQuiz/quiz/pages/resultsPage?userSession=JQ8C62QW8NR792K33646
+адрес тсраницы с результатами
