@@ -52,3 +52,6 @@ http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult
 "userSession":""
 для проверки get запросом адрес например:
 http://127.0.0.1:8080/schoolQuiz/quiz/service/json/finishUserResult?userSession=X36UQX5P0G0Z33Q00IM8
+
+
+MASTER
