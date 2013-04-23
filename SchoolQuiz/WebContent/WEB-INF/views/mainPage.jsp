@@ -231,6 +231,13 @@
 								</td>
 								<td>
 									<tr>
+										<li class="yellow">
+											<p><a href="#">Список вопросов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
 										<li class="yellow2">
 											<p><a href="#" onClick="closeForm()">Завершить работу</a></p>
 										</li>
