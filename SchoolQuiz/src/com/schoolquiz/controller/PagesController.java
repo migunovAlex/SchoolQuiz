@@ -60,6 +60,36 @@ public class PagesController {
 		return "mainPage";
 	}
 	
+	@RequestMapping(value="/answersPage", method=RequestMethod.GET)
+	public String getAnswers(@RequestParam("userSession") String userSession){
+		System.out.println("recieve request to get answers form - "+userSession);
+		CheckSessionSummary sessionSummary = adminService.checkAdminSession(userSession);
+		if(sessionSummary.getErrorData().getErrorCode()!=ErrorData.CODE_OK) return "loginForm";
+		adminService.updateSessionActivity(userSession);
+		
+		return "answersPage";
+	}
+	
+	@RequestMapping(value="/resultsPage", method=RequestMethod.GET)
+	public String getResultsPage(@RequestParam("userSession") String userSession){
+		System.out.println("recieve request to get results form - "+userSession);
+		CheckSessionSummary sessionSummary = adminService.checkAdminSession(userSession);
+		if(sessionSummary.getErrorData().getErrorCode()!=ErrorData.CODE_OK) return "loginForm";
+		adminService.updateSessionActivity(userSession);
+		
+		return "resultsPage";
+	}
+	
+	@RequestMapping(value="/questionsInGroups", method=RequestMethod.GET)
+	public String getQuestionsInGroups(@RequestParam("userSession") String userSession){
+		System.out.println("recieve request to get questionsInGroups form - "+userSession);
+		CheckSessionSummary sessionSummary = adminService.checkAdminSession(userSession);
+		if(sessionSummary.getErrorData().getErrorCode()!=ErrorData.CODE_OK) return "loginForm";
+		adminService.updateSessionActivity(userSession);
+		
+		return "questionsInGroups";
+	}
+	
 	@RequestMapping(value="/checkUserSession", method=RequestMethod.POST)
 	public @ResponseBody CheckSessionSummary checkActiveSession(@RequestBody UserSession userSession){
 		CheckSessionSummary sessionSummary = null;
