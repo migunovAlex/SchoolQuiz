@@ -274,6 +274,9 @@ public class QuizDAOImpl implements QuizDAO{
 	@Override
 	public QuestionGroup getQuestionGroup(long groupId) {
 		QuestionGroup resultGroup = (QuestionGroup) currentSession().load(QuestionGroup.class, groupId);
+		if(resultGroup!=null){
+			Hibernate.initialize(resultGroup);
+		}
 		return resultGroup;
 	}
 

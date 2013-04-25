@@ -89,7 +89,6 @@
 				contentType: "application/json; charset=utf-8",
 				dataType: "json",
 				success: function(data){
-					alert("REcieved data - "+data);
 					var errorCode = data.errorData.errorCode;
 					if(errorCode!=200){
 						alert(data.errorData.errorDescription);

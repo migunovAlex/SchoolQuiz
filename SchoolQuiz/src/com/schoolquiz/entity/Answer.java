@@ -35,6 +35,9 @@ public class Answer {
 	@Column(name="ENABLED")
 	private Boolean enabled;
 	
+	@Column(name="DELETED")
+	private boolean deleted; 
+	
 	public long getId() {
 		return id;
 	}
@@ -73,6 +76,14 @@ public class Answer {
 	@Override
 	public String toString(){
 		return "id - "+id+"; answer text - "+answerText;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 	
 	

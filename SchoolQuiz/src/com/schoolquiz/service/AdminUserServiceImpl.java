@@ -8,16 +8,25 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.schoolquiz.entity.ErrorData;
+import com.schoolquiz.entity.Question;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.admin.AdminUser;
 import com.schoolquiz.entity.admin.AdminUserSession;
 import com.schoolquiz.entity.admin.CheckSessionSummary;
+import com.schoolquiz.entity.admin.DeleteGroupResponse;
 import com.schoolquiz.entity.admin.FinishSessionSummary;
 import com.schoolquiz.entity.admin.GroupForAdmin;
 import com.schoolquiz.entity.admin.OperationGroupResponse;
 import com.schoolquiz.entity.admin.decorated.AdminUserSessionSummary;
 import com.schoolquiz.entity.admin.decorated.CustomQuestionGroupResponse;
+import com.schoolquiz.entity.admin.request.AddGroupRequest;
+import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
+import com.schoolquiz.entity.admin.request.EditGroupRequest;
+import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
 import com.schoolquiz.entity.admin.request.UserSession;
+import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
+import com.schoolquiz.entity.admin.response.QuestionForAdmin;
+import com.schoolquiz.entity.controllerparams.QuestionForGroup;
 import com.schoolquiz.persistence.AdminDAO;
 import com.schoolquiz.persistence.QuizDAO;
 
@@ -155,6 +164,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		if(questionGroups.size()>0){
 			groupList = new LinkedList<GroupForAdmin>();
 			for(QuestionGroup questionGroup:questionGroups){
+				if(questionGroup.getDeleted()==true) continue;
 				GroupForAdmin group = new GroupForAdmin();
 				group.setId(questionGroup.getId());
 				group.setGroupName(questionGroup.getGroupName());
@@ -169,16 +179,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 	}
 	
 	@Override
-	public OperationGroupResponse addGroup(String userSession, String groupName) {
+	public OperationGroupResponse addGroup(AddGroupRequest addGroupRequest) {
 		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
-		CheckSessionSummary checkAdminSessionRes = checkAdminSession(userSession);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(addGroupRequest.getUserSession());
 		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
 			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
 			return operationResponse;
 		}
 		QuestionGroup groupToAdd = new QuestionGroup();
-		groupToAdd.setGroupName(groupName);
+		groupToAdd.setGroupName(addGroupRequest.getGroupName());
 		groupToAdd.setEnabled(true);
+		groupToAdd.setDeleted(false);
 		QuestionGroup resultGroup = adminDao.addQuestionGroup(groupToAdd);
 		if(resultGroup==null){
 			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
@@ -187,22 +198,29 @@ public class AdminUserServiceImpl implements AdminUserService {
 		}
 		
 		operationResponse.setAdded(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
 	}
 
 	@Override
-	public OperationGroupResponse editGroup(String userSession, long groupId, String groupName, boolean enabled) {
+	public OperationGroupResponse editGroup(EditGroupRequest editGroupRequest) {
 		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
-		CheckSessionSummary checkAdminSessionRes = checkAdminSession(userSession);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(editGroupRequest.getUserSession());
 		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
 			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
 			return operationResponse;
 		}
-		QuestionGroup groupToEdit = new QuestionGroup();
-		groupToEdit.setGroupName(groupName);
-		groupToEdit.setId(groupId);
-		groupToEdit.setEnabled(enabled);
+		
+		QuestionGroup groupToEdit = quizDao.getQuestionGroup(editGroupRequest.getGroupId());
+		if(groupToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		groupToEdit.setGroupName(editGroupRequest.getGroupName());
+		groupToEdit.setEnabled(editGroupRequest.isEnabled());
 		QuestionGroup resultGroup = adminDao.updateQuestionGroup(groupToEdit);
 		if(resultGroup==null){
 			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
@@ -211,28 +229,38 @@ public class AdminUserServiceImpl implements AdminUserService {
 		}
 		
 		operationResponse.setAdded(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
 	}
 
 	@Override
-	public OperationGroupResponse deleteGroup(String userSession, long groupId) {
-		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
-		CheckSessionSummary checkAdminSessionRes = checkAdminSession(userSession);
+	public DeleteGroupResponse deleteGroup(DeleteGroupRequest deleteGroupRequest) {
+		DeleteGroupResponse operationResponse = new DeleteGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(deleteGroupRequest.getUserSession());
 		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
 			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
 			return operationResponse;
 		}
-		QuestionGroup groupToDelete = quizDao.getQuestionGroup(groupId);
-		
-		boolean deleted = adminDao.deleteQuestionGroup(groupToDelete);
-		if(deleted==false){
+		QuestionGroup groupToDelete = quizDao.getQuestionGroup(deleteGroupRequest.getGroupId());
+		groupToDelete.setDeleted(true);
+		groupToDelete = adminDao.updateQuestionGroup(groupToDelete);
+		if(groupToDelete==null){
 			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
 			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
 			return operationResponse;
 		}
 		
-		operationResponse.setAdded(true);
+		List<Question> relatedQuestions = adminDao.getQuestionsForGroup(groupToDelete);
+		
+		for(Question question:relatedQuestions){
+			question.setDeleted(true);
+			question.setQuestionGroup(null);
+			adminDao.updateQuestion(question);
+		}
+		
+		operationResponse.setDeleted(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
 	}
@@ -277,6 +305,45 @@ public class AdminUserServiceImpl implements AdminUserService {
 			
 		}
 		
+	}
+
+
+
+
+	@Override
+	public GetQuestionsForGroupResponse getQuestionsForGroup(GetQuestionsForGroup getQuestionsForGroupRequest) {
+		GetQuestionsForGroupResponse operationResponse = new GetQuestionsForGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getQuestionsForGroupRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		QuestionGroup questionGroup = quizDao.getQuestionGroup(getQuestionsForGroupRequest.getGroupId());
+		if(questionGroup == null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION_GROUP);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION_GROUP);
+			return operationResponse;
+		}
+		
+		List<Question> questionsForGroup = adminDao.getQuestionsForGroup(questionGroup);
+		if(questionsForGroup.size()>0){
+			List<QuestionForAdmin> questions = new ArrayList<>();
+			for(Question question:questionsForGroup){
+				if(question.isDeleted())continue;
+				QuestionForAdmin questionForAdmin = new QuestionForAdmin();
+				questionForAdmin.setId(question.getId());
+				questionForAdmin.setQuestionText(question.getQuestionText());
+				questionForAdmin.setParentId(question.getParentId());
+				questionForAdmin.setEnabled(question.getEnabled());
+				questions.add(questionForAdmin);
+			}
+			operationResponse.setQuestionGroups(questions);
+		}
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
+		
+		return operationResponse;
 	}
 
 
