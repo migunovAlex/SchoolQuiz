@@ -90,51 +90,6 @@ public class PagesController {
 		return "questionsInGroups";
 	}
 	
-	@RequestMapping(value="/checkUserSession", method=RequestMethod.POST)
-	public @ResponseBody CheckSessionSummary checkActiveSession(@RequestBody UserSession userSession){
-		CheckSessionSummary sessionSummary = null;
-		if(userSession==null){
-			sessionSummary = new CheckSessionSummary();
-			sessionSummary.getErrorData().setErrorCode(ErrorData.WRONG_PARAMS);
-			sessionSummary.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_WRONG_PARAMS);
-			return sessionSummary;
-		}
-		sessionSummary = adminService.checkAdminSession(userSession.getUserSession());
-		return sessionSummary;
-	}
 	
-	@RequestMapping(value="/finishUserSession", method=RequestMethod.POST)
-	public @ResponseBody FinishSessionSummary finishSession(@RequestBody UserSession userSession){
-		FinishSessionSummary finishSessionSummary = adminService.finishSession(userSession.getUserSession());
-		return finishSessionSummary;
-	}
-	
-	@RequestMapping(value="/json/getGroupList", method=RequestMethod.POST)
-	public @ResponseBody CustomQuestionGroupResponse getGroupsForAdmin(@RequestBody GroupRequest groupRequest){
-		System.out.println("Recieved request for user groups - "+groupRequest);
-		
-		return adminService.getGroupsForAdmin(groupRequest.getUserSession(), groupRequest.getNumberFrom(), groupRequest.getNumberOfItems());
-	}
-	
-	@RequestMapping(value="/json/addGroup", method=RequestMethod.POST)
-	public @ResponseBody OperationGroupResponse addGroupByAdmin(@RequestBody AddGroupRequest addGroupRequest){
-		System.out.println("Recieved request to add group - "+addGroupRequest);
-		
-		return adminService.addGroup(addGroupRequest.getUserSession(), addGroupRequest.getGroupName());
-	}
-	
-	@RequestMapping(value="/json/editGroup", method=RequestMethod.POST)
-	public @ResponseBody OperationGroupResponse editGroupByAdmin(@RequestBody EditGroupRequest editGroupRequest){
-		System.out.println("Recieved request to edit group - "+editGroupRequest);
-		
-		return adminService.editGroup(editGroupRequest.getUserSession(), editGroupRequest.getGroupId(), editGroupRequest.getGroupName(), editGroupRequest.isEnabled());
-	}
-	
-	@RequestMapping(value="/json/deleteGroup", method=RequestMethod.POST)
-	public @ResponseBody OperationGroupResponse deleteGroupByAdmin(@RequestBody DeleteGroupRequest deleteGroupRequest){
-		System.out.println("Recieved request to delete group - "+deleteGroupRequest);
-		
-		return adminService.deleteGroup(deleteGroupRequest.getUserSession(), deleteGroupRequest.getGroupId());
-	}
 	
 }

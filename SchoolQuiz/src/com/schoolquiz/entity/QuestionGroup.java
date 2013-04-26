@@ -29,6 +29,9 @@ public class QuestionGroup {
 	
 	@Column(name="ENABLED")
 	private Boolean enabled;
+	
+	@Column(name="DELETED")
+	private boolean deleted;
 
 	public long getId() {
 		return id;
@@ -66,6 +69,14 @@ public class QuestionGroup {
 	@Override
 	public String toString(){
 		return "group id - "+id+"; group Name - "+groupName;
+	}
+
+	public boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 
 }

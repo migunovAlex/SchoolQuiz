@@ -64,3 +64,32 @@ http://localhost:8090/schoolQuiz/quiz/pages/answersPage?userSession=JQ8C62QW8NR7
 
 http://localhost:8090/schoolQuiz/quiz/pages/resultsPage?userSession=JQ8C62QW8NR792K33646
 адрес тсраницы с результатами
+
+
+Работа с группами вопросов:
+http://localhost:8090/schoolQuiz/quiz/json/addGroup
+Добавление группы вопросов
+параметры:
+"userSession":"NU8QX38491VS20C6SKIW",
+"groupName":"Временная группа"
+
+http://localhost:8090/schoolQuiz/quiz/json/editGroup
+Изменение группы
+параметры:
+"userSession":"NU8QX38491VS20C6SKIW",
+"groupId":"8",
+"groupName":"Временная тестовая группа",
+"enabled":"true"
+
+http://localhost:8090/schoolQuiz/quiz/json/deleteGroup
+удаление группы
+параметры:
+"userSession":"NU8QX38491VS20C6SKIW",
+"groupId":"8"
+
+
+http://localhost:8090/schoolQuiz/quiz/json/getQuestionListForGroup
+Получение списка вопросов для группы
+параметры:
+"userSession":"NU8QX38491VS20C6SKIW",
+"groupId":"3"

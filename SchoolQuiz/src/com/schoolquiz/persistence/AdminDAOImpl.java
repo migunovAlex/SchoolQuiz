@@ -12,6 +12,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.schoolquiz.entity.Question;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.admin.AdminUser;
 import com.schoolquiz.entity.admin.AdminUserSession;
@@ -200,6 +201,26 @@ public class AdminDAOImpl implements AdminDAO {
 			return false;
 		}
 		return true;
+	}
+
+
+
+	@Override
+	public List<Question> getQuestionsForGroup(QuestionGroup questionGroup) {
+		List<Question> resultList = currentSession().createCriteria(Question.class).add(Restrictions.eq("questionGroup", questionGroup)).list();
+		return resultList;
+	}
+
+
+
+	@Override
+	public Question updateQuestion(Question question) {
+		try{
+			currentSession().update(question);
+		}catch(HibernateException e){
+			return null;
+		}
+		return question;
 	}
 
 

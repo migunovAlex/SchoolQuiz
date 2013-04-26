@@ -39,7 +39,7 @@
 			dataToSend.numberOfItems = "20";
 			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
-				url:$.cookie("SERVER_HOST")+"pages/json/getGroupList",
+				url:$.cookie("SERVER_HOST")+"json/getGroupList",
 				datatype:'json',
 				mtype:"POST",
 				loadBeforeSend: function(xhr)

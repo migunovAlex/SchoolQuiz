@@ -2,6 +2,7 @@ package com.schoolquiz.persistence;
 
 import java.util.List;
 
+import com.schoolquiz.entity.Question;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.admin.AdminUser;
 import com.schoolquiz.entity.admin.AdminUserSession;
@@ -29,5 +30,9 @@ public interface AdminDAO {
 	public QuestionGroup updateQuestionGroup(QuestionGroup questionGroup);
 	
 	public Boolean deleteQuestionGroup(QuestionGroup questionGroup);
+
+	public List<Question> getQuestionsForGroup(QuestionGroup groupToDelete);
+
+	public Question updateQuestion(Question question);
 
 }
