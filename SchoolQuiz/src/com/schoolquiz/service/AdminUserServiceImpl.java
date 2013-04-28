@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.schoolquiz.entity.Answer;
 import com.schoolquiz.entity.ErrorData;
 import com.schoolquiz.entity.Question;
 import com.schoolquiz.entity.QuestionGroup;
@@ -19,11 +20,29 @@ import com.schoolquiz.entity.admin.GroupForAdmin;
 import com.schoolquiz.entity.admin.OperationGroupResponse;
 import com.schoolquiz.entity.admin.decorated.AdminUserSessionSummary;
 import com.schoolquiz.entity.admin.decorated.CustomQuestionGroupResponse;
+import com.schoolquiz.entity.admin.request.AddAnswerRequest;
 import com.schoolquiz.entity.admin.request.AddGroupRequest;
+import com.schoolquiz.entity.admin.request.AddQuestionRequest;
+import com.schoolquiz.entity.admin.request.DeleteAnswerRequest;
 import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
+import com.schoolquiz.entity.admin.request.DeleteQuestionRequest;
+import com.schoolquiz.entity.admin.request.EditAnswerRequest;
 import com.schoolquiz.entity.admin.request.EditGroupRequest;
+import com.schoolquiz.entity.admin.request.EditQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetAnswerRequest;
+import com.schoolquiz.entity.admin.request.GetAnswersForQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
+import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
 import com.schoolquiz.entity.admin.request.UserSession;
+import com.schoolquiz.entity.admin.response.AddAnswerResponse;
+import com.schoolquiz.entity.admin.response.AnswerEntity;
+import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
+import com.schoolquiz.entity.admin.response.EditAnswerResponse;
+import com.schoolquiz.entity.admin.response.GetAnswerResponse;
+import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
+import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
+import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
 import com.schoolquiz.entity.admin.response.QuestionForAdmin;
 import com.schoolquiz.entity.controllerparams.QuestionForGroup;
@@ -213,7 +232,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		}
 		
 		QuestionGroup groupToEdit = quizDao.getQuestionGroup(editGroupRequest.getGroupId());
-		if(groupToEdit==null){
+		if(groupToEdit==null || groupToEdit.getDeleted()==true){
 			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
 			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
 			return operationResponse;
@@ -245,7 +264,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		QuestionGroup groupToDelete = quizDao.getQuestionGroup(deleteGroupRequest.getGroupId());
 		groupToDelete.setDeleted(true);
 		groupToDelete = adminDao.updateQuestionGroup(groupToDelete);
-		if(groupToDelete==null){
+		if(groupToDelete==null || groupToDelete.getDeleted()==true){
 			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
 			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
 			return operationResponse;
@@ -344,6 +363,206 @@ public class AdminUserServiceImpl implements AdminUserService {
 		
 		
 		return operationResponse;
+	}
+	
+	@Override
+	public GetQuestionGroupResponse getQuestionGroup(GetQuestionGroupRequest getQuestionGroupRequest) {
+		GetQuestionGroupResponse operationResponse = new GetQuestionGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getQuestionGroupRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		QuestionGroup questionGroup = quizDao.getQuestionGroup(getQuestionGroupRequest.getQuestionGroupId());
+		if(questionGroup==null || !questionGroup.getDeleted()){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION_GROUP);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION_GROUP);
+			return operationResponse;
+		}
+		
+		operationResponse.setGroupName(questionGroup.getGroupName());
+		operationResponse.setId(questionGroup.getId());
+		operationResponse.setEnabled(questionGroup.getEnabled());
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
+		return operationResponse;
+	}
+
+	@Override
+	public GetQuestionResponse getQuestion(GetQuestionRequest getQuestionRequest) {
+		GetQuestionResponse operationResponse = new GetQuestionResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Question question = quizDao.getQuestion(getQuestionRequest.getQuestionId());
+		if(question == null || question.isDeleted()){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return operationResponse;
+		}
+		
+		operationResponse.setId(getQuestionRequest.getQuestionId());
+		operationResponse.setParentQuestionId(question.getParentId());
+		operationResponse.setQuestionGroupId(question.getQuestionGroup().getId());
+		operationResponse.setQuestionText(question.getQuestionText());
+		operationResponse.setResponseType(question.getResponseType());
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
+		return operationResponse;
+	}
+
+	@Override
+	public OperationGroupResponse addQuestion(AddQuestionRequest addQuestionRequest) {
+		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(addQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		QuestionGroup questionGroup = quizDao.getQuestionGroup(addQuestionRequest.getQuestionGroup());
+		
+		Question addedQuestion = new Question();
+		addedQuestion.setDeleted(false);
+		addedQuestion.setEnabled(addQuestionRequest.getEnabled());
+		addedQuestion.setParentId(addQuestionRequest.getQuestionParentId());
+		addedQuestion.setQuestionGroup(questionGroup);
+		addedQuestion.setQuestionText(addQuestionRequest.getQuestionText());
+		addedQuestion.setResponseType(addQuestionRequest.getResponseType());
+		
+		addedQuestion = quizDao.addQuestion(addedQuestion);
+		if(addedQuestion==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		operationResponse.setAdded(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+	
+		return operationResponse;
+	}
+
+	@Override
+	public OperationGroupResponse editQuestion(EditQuestionRequest editQuestionRequest) {
+		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(editQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Question questionToEdit = quizDao.getQuestion(editQuestionRequest.getQuestionId());
+		if(questionToEdit==null || questionToEdit.isDeleted()){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return operationResponse;
+		}
+		
+		
+		questionToEdit.setEnabled(editQuestionRequest.getEnabled());
+		questionToEdit.setParentId(editQuestionRequest.getQuestionParentId());
+		QuestionGroup questionGroup = quizDao.getQuestionGroup(editQuestionRequest.getQuestionGroup());
+		questionToEdit.setQuestionGroup(questionGroup);
+		questionToEdit.setQuestionText(editQuestionRequest.getQuestionText());
+		questionToEdit.setResponseType(Integer.parseInt(editQuestionRequest.getResponseType()+""));
+		
+		questionToEdit = quizDao.updateQuestion(questionToEdit);
+		
+		if(questionToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
+		return operationResponse;
+	}
+
+	@Override
+	public OperationGroupResponse deleteQuestion(DeleteQuestionRequest deleteQuestionRequest) {
+		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(deleteQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Question deletedQuestion = quizDao.getQuestion(deleteQuestionRequest.getQuestionId());
+		if(deletedQuestion==null || deletedQuestion.isDeleted()){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return operationResponse;
+		}
+		
+		deletedQuestion = quizDao.deleteQuestion(deletedQuestion);
+		
+		if(deletedQuestion==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
+	}
+
+	
+
+	@Override
+	public GetAnswersForQuestionResponse getAnswersForQuestion(GetAnswersForQuestionRequest getAnswerRequest) {
+		GetAnswersForQuestionResponse operationResponse = new GetAnswersForQuestionResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getAnswerRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Question foundQuestion = quizDao.getQuestion(getAnswerRequest.getQuestionId());
+		if(foundQuestion==null || foundQuestion.isDeleted()){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return operationResponse;
+		}
+		
+		List<AnswerEntity> answersForQuestion = quizDao.getAnswersForQuestion(foundQuestion);
+		
+		operationResponse.setAnswerList(answersForQuestion);
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
+	}
+
+	@Override
+	public GetAnswerResponse getAnswer(GetAnswerRequest getAnswerRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AddAnswerResponse addAnswer(AddAnswerRequest addAnswerRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EditAnswerResponse editAnswer(EditAnswerRequest editAnswerRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DeleteAnswerResponse deleteAnswer(DeleteAnswerRequest deleteAnswerRequest) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

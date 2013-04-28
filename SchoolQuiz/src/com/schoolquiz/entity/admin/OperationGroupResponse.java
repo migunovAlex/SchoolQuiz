@@ -9,6 +9,7 @@ public class OperationGroupResponse {
 	
 	public OperationGroupResponse(){
 		errorData = new ErrorData();
+		added = false;
 	}
 	
 	public ErrorData getErrorData() {

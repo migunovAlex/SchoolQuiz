@@ -8,6 +8,7 @@ import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.UserAnswer;
 import com.schoolquiz.entity.UserResult;
+import com.schoolquiz.entity.admin.response.AnswerEntity;
 import com.schoolquiz.entity.decorated.QuestionSummary;
 
 public interface QuizDAO {
@@ -40,7 +41,7 @@ public interface QuizDAO {
 	
 	public List<Question> getQuestionsForGroup(long groupId);
 	
-	public List<Answer> getAnswersForQuestion(Question question);
+	public List<AnswerEntity> getAnswersForQuestion(Question question);
 	
 	public List<Question> getSubQuestions(Question question);
 	
@@ -53,6 +54,12 @@ public interface QuizDAO {
 	public QuestionAnswer getQuestionAnswer(Question question, Answer answer);
 	
 	public QuestionGroup getQuestionGroup(long groupId);
+
+	public Question addQuestion(Question addedQuestion);
+
+	public Question updateQuestion(Question questionToEdit);
+
+	public Question deleteQuestion(Question deletedQuestion);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

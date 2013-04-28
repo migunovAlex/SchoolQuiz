@@ -93,3 +93,19 @@ http://localhost:8090/schoolQuiz/quiz/json/getQuestionListForGroup
 параметры:
 "userSession":"NU8QX38491VS20C6SKIW",
 "groupId":"3"
+
+
+http://localhost:8090/schoolQuiz/quiz/json/getQuestionGroup
+Получение данных по групе вопросов
+параметры:
+
+
+http://localhost:8090/schoolQuiz/quiz/json/getQuestion
+получение данных по вопросу
+параметры:
+
+
+http://localhost:8090/schoolQuiz/quiz/json/getAnswersForQuestion
+получение списка ответов для вопроса
+параметры:
+

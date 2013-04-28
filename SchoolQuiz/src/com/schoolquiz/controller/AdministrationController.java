@@ -15,13 +15,30 @@ import com.schoolquiz.entity.admin.FinishSessionSummary;
 import com.schoolquiz.entity.admin.OperationGroupResponse;
 import com.schoolquiz.entity.admin.decorated.AdminUserSessionSummary;
 import com.schoolquiz.entity.admin.decorated.CustomQuestionGroupResponse;
+import com.schoolquiz.entity.admin.request.AddAnswerRequest;
 import com.schoolquiz.entity.admin.request.AddGroupRequest;
+import com.schoolquiz.entity.admin.request.AddQuestionRequest;
+import com.schoolquiz.entity.admin.request.DeleteAnswerRequest;
 import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
+import com.schoolquiz.entity.admin.request.DeleteQuestionRequest;
+import com.schoolquiz.entity.admin.request.EditAnswerRequest;
 import com.schoolquiz.entity.admin.request.EditGroupRequest;
+import com.schoolquiz.entity.admin.request.EditQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetAnswerRequest;
+import com.schoolquiz.entity.admin.request.GetAnswersForQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
+import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
 import com.schoolquiz.entity.admin.request.GroupRequest;
 import com.schoolquiz.entity.admin.request.UserCredentials;
 import com.schoolquiz.entity.admin.request.UserSession;
+import com.schoolquiz.entity.admin.response.AddAnswerResponse;
+import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
+import com.schoolquiz.entity.admin.response.EditAnswerResponse;
+import com.schoolquiz.entity.admin.response.GetAnswerResponse;
+import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
+import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
+import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
 import com.schoolquiz.service.AdminUserService;
 import com.schoolquiz.service.QuizService;
@@ -93,14 +110,85 @@ public class AdministrationController {
 		return adminService.deleteGroup(deleteGroupRequest);
 	}
 	
+	@RequestMapping(value="/getQuestionGroup", method=RequestMethod.POST)
+	public @ResponseBody GetQuestionGroupResponse getQuestionGroup(@RequestBody GetQuestionGroupRequest getQuestionGroupRequest){
+		System.out.println("Recieved request to get group - "+getQuestionGroupRequest);
+		
+		return adminService.getQuestionGroup(getQuestionGroupRequest);
+	}
+	
 	
 	@RequestMapping(value="/getQuestionListForGroup", method=RequestMethod.POST)
-	public @ResponseBody GetQuestionsForGroupResponse getQuestionfForGroup(@RequestBody GetQuestionsForGroup getQuestionsForGroupRequest){
+	public @ResponseBody GetQuestionsForGroupResponse getQuestionsForGroup(@RequestBody GetQuestionsForGroup getQuestionsForGroupRequest){
 		System.out.println("Recieved request to get questions for group - "+getQuestionsForGroupRequest);
 		
 		return adminService.getQuestionsForGroup(getQuestionsForGroupRequest);
 	}
 	
+	
+	@RequestMapping(value="/addQuestion", method=RequestMethod.POST)
+	public @ResponseBody OperationGroupResponse addQuestion(@RequestBody AddQuestionRequest addQuestionRequest){
+		System.out.println("Recieved request to add question - "+addQuestionRequest);
+		
+		return adminService.addQuestion(addQuestionRequest);
+	}
+	
+	@RequestMapping(value="/editQuestion", method=RequestMethod.POST)
+	public @ResponseBody OperationGroupResponse editQuestion(@RequestBody EditQuestionRequest editQuestionRequest){
+		System.out.println("Recieved request to edit question - "+editQuestionRequest);
+		
+		return adminService.editQuestion(editQuestionRequest);
+	}
+	
+	@RequestMapping(value="/deleteQuestion", method=RequestMethod.POST)
+	public @ResponseBody OperationGroupResponse deleteQuestion(@RequestBody DeleteQuestionRequest deleteQuestionRequest){
+		System.out.println("Recieved request to delete question - "+deleteQuestionRequest);
+		
+		return adminService.deleteQuestion(deleteQuestionRequest);
+	}
+	
+	@RequestMapping(value="/getQuestion", method=RequestMethod.POST)
+	public @ResponseBody GetQuestionResponse getQuestion(@RequestBody GetQuestionRequest getQuestionRequest){
+		System.out.println("Recieved request to get question - "+getQuestionRequest);
+		
+		return adminService.getQuestion(getQuestionRequest);
+	}
+	
+	@RequestMapping(value="/getAnswersForQuestion", method=RequestMethod.POST)
+	public @ResponseBody GetAnswersForQuestionResponse getAnswersForQuestion(@RequestBody GetAnswersForQuestionRequest getAnswerRequest){
+		System.out.println("Recieved request to get answers for question - "+getAnswerRequest);
+		
+		return adminService.getAnswersForQuestion(getAnswerRequest);
+	}
+	
+	@RequestMapping(value="/getAnswer", method=RequestMethod.POST)
+	public @ResponseBody GetAnswerResponse getAnswer(@RequestBody GetAnswerRequest getAnswerRequest){
+		System.out.println("Recieved request to get answer - "+getAnswerRequest);
+		
+		return adminService.getAnswer(getAnswerRequest);
+	}
+	
+	
+	@RequestMapping(value="/addAnswer", method=RequestMethod.POST)
+	public @ResponseBody AddAnswerResponse addAnswer(@RequestBody AddAnswerRequest addAnswerRequest){
+		System.out.println("Recieved request to add answer - "+addAnswerRequest);
+		
+		return adminService.addAnswer(addAnswerRequest);
+	}
+	
+	@RequestMapping(value="/editAnswer", method=RequestMethod.POST)
+	public @ResponseBody EditAnswerResponse editAnswer(@RequestBody EditAnswerRequest editAnswerRequest){
+		System.out.println("Recieved request to edit answer - "+editAnswerRequest);
+		
+		return adminService.editAnswer(editAnswerRequest);
+	}
+	
+	@RequestMapping(value="/deleteAnswer", method=RequestMethod.POST)
+	public @ResponseBody DeleteAnswerResponse deleteAnswer(@RequestBody DeleteAnswerRequest deleteAnswerRequest){
+		System.out.println("Recieved request to delete answer - "+deleteAnswerRequest);
+		
+		return adminService.deleteAnswer(deleteAnswerRequest);
+	}
 	
 
 }

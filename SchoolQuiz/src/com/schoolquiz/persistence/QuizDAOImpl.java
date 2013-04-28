@@ -21,6 +21,7 @@ import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.UserAnswer;
 import com.schoolquiz.entity.UserResult;
+import com.schoolquiz.entity.admin.response.AnswerEntity;
 import com.schoolquiz.entity.decorated.QuestionSummary;
 import com.schoolquiz.utils.SessionGenerator;
 
@@ -140,6 +141,7 @@ public class QuizDAOImpl implements QuizDAO{
 //		System.out.println("question-answer - "+question.getQuestionAnswerList());
 		return question;
 	}
+	
 
 	@Override
 	public Answer getAnswer(long answerId) {
@@ -199,14 +201,21 @@ public class QuizDAOImpl implements QuizDAO{
 	}
 
 	@Override
-	public List<Answer> getAnswersForQuestion(Question question) {
-		List<Answer> answerList = new LinkedList<Answer>();
+	public List<AnswerEntity> getAnswersForQuestion(Question question) {
+		List<AnswerEntity> answerList = new LinkedList<>();
 		List<QuestionAnswer> questionAnswerList = currentSession().createCriteria(QuestionAnswer.class).add(Restrictions.eq("question", question)).list();
 		System.out.println("QuestionAnswer List - "+questionAnswerList);
 		for(QuestionAnswer questionAnswer:questionAnswerList){
+				
 			Hibernate.initialize(questionAnswer.getAnswer());
+			AnswerEntity answerEntity = new AnswerEntity();
+			answerEntity.setId(questionAnswer.getAnswer().getId());
+			answerEntity.setAnswerText(questionAnswer.getAnswer().getAnswerText());
+			answerEntity.setEnabled(questionAnswer.getAnswer().getEnabled());
+			answerEntity.setRight(questionAnswer.getAnswer().getEnabled());
+			answerEntity.setRight(questionAnswer.isRight());
 			System.out.println(questionAnswer.getAnswer());
-			answerList.add(questionAnswer.getAnswer());
+			answerList.add(answerEntity);
 		}
 		
 		
@@ -261,7 +270,7 @@ public class QuizDAOImpl implements QuizDAO{
 
 	@Override
 	public List<QuestionGroup> getQuestionGroups(int currentItem, int itemsNumber) {
-		List<QuestionGroup> questionGroups = currentSession().createCriteria(QuestionGroup.class).setFirstResult(currentItem).setMaxResults(itemsNumber).list();
+		List<QuestionGroup> questionGroups = currentSession().createCriteria(QuestionGroup.class).list();
 		return questionGroups;
 	}
 	
@@ -278,6 +287,40 @@ public class QuizDAOImpl implements QuizDAO{
 			Hibernate.initialize(resultGroup);
 		}
 		return resultGroup;
+	}
+
+	@Override
+	public Question addQuestion(Question addedQuestion) {
+		Long savedId=null;
+		try{
+			savedId = (Long) currentSession().save(addedQuestion);
+		}catch(HibernateException ex){
+			return null;
+		}
+		addedQuestion.setId(savedId);
+		
+		return addedQuestion;
+	}
+
+	@Override
+	public Question updateQuestion(Question questionToEdit) {
+		try{
+			currentSession().update(questionToEdit);
+		}catch(HibernateException ex){
+			return null;
+		}
+		return questionToEdit;
+	}
+
+	@Override
+	public Question deleteQuestion(Question deletedQuestion) {
+		try{
+			deletedQuestion.setDeleted(true);
+			updateQuestion(deletedQuestion);
+		}catch(HibernateException ex){
+			return null;
+		}
+		return deletedQuestion;
 	}
 
 
