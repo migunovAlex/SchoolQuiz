@@ -133,9 +133,11 @@ public class QuizDAOImpl implements QuizDAO{
 	@Override
 	public Question getQuestion(long questionId) {
 		Question question = (Question) currentSession().load(Question.class, questionId);
-		if(question!=null){
+		try{
 			Hibernate.initialize(question);
 			Hibernate.initialize(question.getQuestionGroup());
+		}catch(Exception e){
+			return null;
 		}
 //		if(question!=null)	Hibernate.initialize(question.getQuestionAnswerList());
 //		System.out.println("question-answer - "+question.getQuestionAnswerList());
@@ -146,6 +148,11 @@ public class QuizDAOImpl implements QuizDAO{
 	@Override
 	public Answer getAnswer(long answerId) {
 		Answer answer = (Answer) currentSession().load(Answer.class, answerId);
+		try{
+			Hibernate.initialize(answer);
+		} catch(Exception e){
+			return null;
+		}
 		return answer;
 	}
 
@@ -283,8 +290,10 @@ public class QuizDAOImpl implements QuizDAO{
 	@Override
 	public QuestionGroup getQuestionGroup(long groupId) {
 		QuestionGroup resultGroup = (QuestionGroup) currentSession().load(QuestionGroup.class, groupId);
-		if(resultGroup!=null){
+		try{
 			Hibernate.initialize(resultGroup);
+		} catch(Exception e){
+			return null;
 		}
 		return resultGroup;
 	}
@@ -321,6 +330,29 @@ public class QuizDAOImpl implements QuizDAO{
 			return null;
 		}
 		return deletedQuestion;
+	}
+
+	@Override
+	public Answer saveAnswer(Answer answerToAdd) {
+		try{
+			Long id = (Long) currentSession().save(answerToAdd);
+			answerToAdd.setId(id);
+		}catch(HibernateException ex){
+			return null;
+		}
+		
+		return answerToAdd;
+	}
+
+	@Override
+	public Answer updateAnswer(Answer answerToEdit) {
+		try{
+			currentSession().update(answerToEdit);
+		}catch(HibernateException ex){
+			return null;
+		}
+		
+		return answerToEdit;
 	}
 
 

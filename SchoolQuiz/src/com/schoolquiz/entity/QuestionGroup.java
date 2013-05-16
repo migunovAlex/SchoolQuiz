@@ -19,7 +19,7 @@ public class QuestionGroup {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="ID")
-	private long id;
+	private Long id;
 	
 	@Column(name="GROUP_NAME")
 	private String groupName;
@@ -33,11 +33,11 @@ public class QuestionGroup {
 	@Column(name="DELETED")
 	private boolean deleted;
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

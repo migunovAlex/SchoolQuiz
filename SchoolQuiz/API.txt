@@ -98,14 +98,74 @@ http://localhost:8090/schoolQuiz/quiz/json/getQuestionListForGroup
 http://localhost:8090/schoolQuiz/quiz/json/getQuestionGroup
 ѕолучение данных по групе вопросов
 параметры:
-
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionGroupId":"7"
 
 http://localhost:8090/schoolQuiz/quiz/json/getQuestion
 получение данных по вопросу
 параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionId":"2"
 
+http://localhost:8090/schoolQuiz/quiz/json/addQuestion
+создание нового вопроса
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionText":"»звестна€ немецка€ марка автомобилей",
+"responseType":"1",
+"questionGroup":"2",
+"questionParentId":null,
+"enabled":"true"
+
+http://localhost:8090/schoolQuiz/quiz/json/editQuestion
+редактирование вопроса
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionId":"8",
+"questionText":"»звестна€ немецка€ марка автомобилей",
+"responseType":"1",
+"questionGroup":"2",
+"questionParentId":null,
+"enabled":"true"
+
+http://localhost:8090/schoolQuiz/quiz/json/deleteQuestion
+удаление вопроса
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionId":"8"
 
 http://localhost:8090/schoolQuiz/quiz/json/getAnswersForQuestion
 получение списка ответов дл€ вопроса
 параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"questionId":"4"
+
+http://localhost:8090/schoolQuiz/quiz/json/getAnswer
+получение ответа
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"answerId":"4"
+
+http://localhost:8090/schoolQuiz/quiz/json/addAnswer
+добавление ответа
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"answerText":"Ѕћ¬",
+"enabled":true
+
+http://localhost:8090/schoolQuiz/quiz/json/editAnswer
+редактирование ответа
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"answerId":"29",
+"answerText":"Ѕћ¬",
+"enabled":false
+
+http://localhost:8090/schoolQuiz/quiz/json/deleteAnswer
+удаление ответа
+параметры:
+"userSession":"2Q56C8G2079J4G2JR38D",
+"answerId":"29"
+
+
 

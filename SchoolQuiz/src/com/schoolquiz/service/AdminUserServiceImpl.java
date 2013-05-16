@@ -216,7 +216,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return operationResponse;
 		}
 		
-		operationResponse.setAdded(true);
+		operationResponse.setResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
@@ -247,7 +247,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return operationResponse;
 		}
 		
-		operationResponse.setAdded(true);
+		operationResponse.setResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
@@ -375,7 +375,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		}
 		
 		QuestionGroup questionGroup = quizDao.getQuestionGroup(getQuestionGroupRequest.getQuestionGroupId());
-		if(questionGroup==null || !questionGroup.getDeleted()){
+		if(questionGroup==null || questionGroup.getDeleted()){
 			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION_GROUP);
 			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION_GROUP);
 			return operationResponse;
@@ -411,6 +411,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		operationResponse.setQuestionGroupId(question.getQuestionGroup().getId());
 		operationResponse.setQuestionText(question.getQuestionText());
 		operationResponse.setResponseType(question.getResponseType());
+		operationResponse.setEnabled(question.getEnabled());
 		
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
@@ -443,7 +444,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return operationResponse;
 		}
 		
-		operationResponse.setAdded(true);
+		operationResponse.setResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 	
 		return operationResponse;
@@ -452,6 +453,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 	@Override
 	public OperationGroupResponse editQuestion(EditQuestionRequest editQuestionRequest) {
 		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
+		operationResponse.setResult(false);
 		CheckSessionSummary checkAdminSessionRes = checkAdminSession(editQuestionRequest.getUserSession());
 		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
 			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
@@ -481,7 +483,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return operationResponse;
 		}
 		
-		
+		operationResponse.setResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		
 		return operationResponse;
@@ -490,6 +492,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 	@Override
 	public OperationGroupResponse deleteQuestion(DeleteQuestionRequest deleteQuestionRequest) {
 		OperationGroupResponse operationResponse = new OperationGroupResponse(); 
+		operationResponse.setResult(false);
 		CheckSessionSummary checkAdminSessionRes = checkAdminSession(deleteQuestionRequest.getUserSession());
 		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
 			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
@@ -510,7 +513,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
 			return operationResponse;
 		}
-		
+		operationResponse.setResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		return operationResponse;
 	}
@@ -543,26 +546,121 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 	@Override
 	public GetAnswerResponse getAnswer(GetAnswerRequest getAnswerRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		GetAnswerResponse operationResponse = new GetAnswerResponse(); 
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getAnswerRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Answer answer = quizDao.getAnswer(getAnswerRequest.getAnswerId());
+		if(answer==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_ANSWER);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_ANSWER);
+			return operationResponse;
+		}
+		
+		operationResponse.setId(answer.getId());
+		operationResponse.setAnswerText(answer.getAnswerText());
+		operationResponse.setEnabled(answer.getEnabled());
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
 	}
 
 	@Override
 	public AddAnswerResponse addAnswer(AddAnswerRequest addAnswerRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		AddAnswerResponse operationResponse = new AddAnswerResponse(); 
+		operationResponse.setResult(false);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(addAnswerRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Answer answerToAdd = new Answer();
+		answerToAdd.setAnswerText(addAnswerRequest.getAnswerText());
+		answerToAdd.setDeleted(false);
+		answerToAdd.setEnabled(addAnswerRequest.getEnabled());
+		answerToAdd = quizDao.saveAnswer(answerToAdd);
+		
+		if(answerToAdd==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		operationResponse.setResult(true);
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
 	}
 
 	@Override
 	public EditAnswerResponse editAnswer(EditAnswerRequest editAnswerRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		EditAnswerResponse operationResponse = new EditAnswerResponse(); 
+		operationResponse.setResult(false);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(editAnswerRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Answer answerToEdit = quizDao.getAnswer(editAnswerRequest.getId());
+		if(answerToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_ANSWER);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_ANSWER);
+			return operationResponse;
+		}
+		
+		
+		answerToEdit.setAnswerText(editAnswerRequest.getAnswerText());
+		answerToEdit.setEnabled(editAnswerRequest.getEnabled());
+		answerToEdit = quizDao.updateAnswer(answerToEdit);
+		
+		if(answerToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		operationResponse.setResult(true);
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
 	}
 
 	@Override
 	public DeleteAnswerResponse deleteAnswer(DeleteAnswerRequest deleteAnswerRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		DeleteAnswerResponse operationResponse = new DeleteAnswerResponse(); 
+		operationResponse.setResult(false);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(deleteAnswerRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			operationResponse.setErrorData(checkAdminSessionRes.getErrorData());
+			return operationResponse;
+		}
+		
+		Answer answerToEdit = quizDao.getAnswer(deleteAnswerRequest.getAnswerId());
+		if(answerToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.NO_SUCH_ANSWER);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_ANSWER);
+			return operationResponse;
+		}
+		
+		
+		answerToEdit.setDeleted(true);
+		answerToEdit = quizDao.updateAnswer(answerToEdit);
+		
+		if(answerToEdit==null){
+			operationResponse.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			operationResponse.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return operationResponse;
+		}
+		
+		operationResponse.setResult(true);
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return operationResponse;
 	}
 
 

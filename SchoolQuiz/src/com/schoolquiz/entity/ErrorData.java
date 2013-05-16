@@ -12,6 +12,7 @@ public class ErrorData {
 	public static int QUIZ_MUST_BE_FINISHED = 410;
 	public static int NO_SUCH_QUESTION_GROUP = 420;
 	public static int NO_SUCH_QUESTION = 420;
+	public static int NO_SUCH_ANSWER = 421;
 	
 	public static String DESCRIPTION_OK = "OK";
 	public static String DESCRIPTION_NOT_ENOUGH_PARAMS = "Not enough params";
@@ -23,6 +24,7 @@ public class ErrorData {
 	public static String DESCRIPTION_QUIZ_MUST_BE_FINISHED = "Quiz must be finished before you request for results";
 	public static String DESCRIPTION_NO_SUCH_QUESTION_GROUP = "There is no group with such id";
 	public static String DESCRIPTION_NO_SUCH_QUESTION = "There is no question with such id";
+	public static String DESCRIPTION_NO_SUCH_ANSWER = "There is no answer with such id";
 	
 	private int errorCode;
 	private String errorDescription;

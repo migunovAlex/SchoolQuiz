@@ -60,6 +60,10 @@ public interface QuizDAO {
 	public Question updateQuestion(Question questionToEdit);
 
 	public Question deleteQuestion(Question deletedQuestion);
+
+	public Answer saveAnswer(Answer answerToAdd);
+
+	public Answer updateAnswer(Answer answerToEdit);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

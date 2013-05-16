@@ -14,6 +14,7 @@ import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.UserAnswer;
 import com.schoolquiz.entity.UserResult;
+import com.schoolquiz.entity.admin.response.AnswerEntity;
 import com.schoolquiz.entity.decorated.CheckUserAnswerSummary;
 import com.schoolquiz.entity.decorated.QuestionGroupListSummary;
 import com.schoolquiz.entity.decorated.QuestionOutListSummary;
@@ -450,10 +451,10 @@ public class QuizServiceImpl implements QuizService{
 		System.out.println("question - "+questionOut);
 		questionOutSummary.setQuestion(questionOut);
 		
-		List<Answer> answers = quizDao.getAnswersForQuestion(question);
+		List<AnswerEntity> answers = quizDao.getAnswersForQuestion(question);
 		List<AnswerOut> answerOutList = new LinkedList<AnswerOut>();
 		if(answers==null) return questionOutSummary;
-		for(Answer answer:answers){
+		for(AnswerEntity answer:answers){
 			AnswerOut answerOut = new AnswerOut();
 			answerOut.setId(answer.getId());
 			answerOut.setAnswerText(answer.getAnswerText());
