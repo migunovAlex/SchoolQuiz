@@ -30,59 +30,6 @@
 			createGrid();
 		});
 		
-		function createQuestionInGroupsList(){
-			var groupId = $("#showQuestionsForGroup_id").val();
-			var userSession = $.cookie("ADMIN_SESSION");
-			/*alert("groupId " + groupId + "; userSession " + userSession)*/
-			var dataToSend = new Object();
-			dataToSend.userSession = userSession;
-			dataToSend.groupId = groupId;
-			//dataToSend.numberFrom = 0;
-			//dataToSend.numberOfItems = 1000;
-			var jsonData = JSON.stringify(dataToSend);
-			/*alert("jsonData: " + jsonData);*/
-			$("#questionsForGroupGrid").jqGrid({
-				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
-				datatype:'json',
-				mtype:"POST",
-				loadBeforeSend: function(xhr)
-				{
-				   xhr.setRequestHeader("Content-Type", "application/json");
-				   return xhr;
-				},
-				colNames:["ID","Текст вопроса"],
-				colModel:[
-				{name:'questionId', index:'questionId',width:20, editable:false, editoptions:{readonly:true, size:10},hidden:true},
-				{name:'questionText', index:'questionText', width:780, editable:true, editrules:{required:true}, editoptions:{size:10}}
-				],
-				postData: jsonData,
-				rowNum:10000,
-				height:390,
-				autowidth:false,
-				rownumbers:true,
-				sortname:'id',
-				viewrecords:true,
-				sortorder:"asc",
-				caption:"Список вопросов",
-				emptyrecords:"Пустое поле",
-				loadonce:false,
-				loadcomplete:function(){},
-				jsonReader:{
-					root:"questiontList",
-					page:"page",
-					total:"total",
-					records:"records",
-					repeatitems:false,
-					cell:"cell",
-					id:"id"
-				}
-			});
-			/*alert("url: " + $.cookie("SERVER_HOST")+"json/getQuestionListForGroup " + " xhr: ");
-			alert("jsonData postData: " + jsonData);*/
-			
-			
-		}
-		
 		function editRow(){
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
@@ -97,6 +44,17 @@
 			
 			$( "#dialog-formEdit" ).dialog( "open" );
 			
+		}
+		
+		function checkLength( o, n, min, max ) {
+			 if ( o.val().length > max || o.val().length < min ) {
+				 o.addClass( "ui-state-error" );
+				 updateTips( "Length of " + n + " must be between " +
+				 min + " and " + max + "." );
+				 return false;
+			 } else {
+			 return true;
+			 }
 		}
 		
 		$(function(){
@@ -120,13 +78,13 @@
 				 var bValid = true;
 				 allFields.removeClass( "ui-state-error" );
 				 bValid = bValid && checkLength( editName, "edit_name", 3, 16 );
-				 bValid = bValid && checkLength( editDescription, "edit_description", 3, 200 );
+				// bValid = bValid && checkLength( editDescription, "edit_description", 3, 200 );
 				 if ( bValid ) {
 					 $( "#users tbody" ).append( "<tr>" +
 					 "<td>" + editName.val() + "</td>" +
-					 "<td>" + editDescription.val() + "</td>" +
+					 //"<td>" + editDescription.val() + "</td>" +
 					 "</tr>" );
-					 editGroup(editId.val(), editName.val(), editDescription.val());
+					 editGroup(editId.val(), editName.val(), true);
 					 $( this ).dialog( "close" );
 				 	
 				 }
@@ -138,6 +96,55 @@
 				 close: function() {
 				 	allFields.val( "" ).removeClass( "ui-state-error" );
 				 	$( this ).dialog( "close" );
+				 }
+			}
+			
+			);
+			
+			$( "#dialog-form" ).dialog({
+				
+				 autoOpen: false,
+				 height: 300,
+				 width: 350,
+				 modal: true,
+				 buttons: {
+				 "Сохранить группу": function() {
+				 var bValid = true;
+				 allFields.removeClass( "ui-state-error" );
+				 bValid = bValid && checkLength(name, "name", 3, 16);
+				 if ( bValid ) {
+					 $( "#users tbody" ).append( "<tr>" +
+					 "<td>" + name.val() + "</td>" + "</tr>" );
+					 alert("name.val(): " + name.val());
+					 createGroup(name.val());
+					 $( this ).dialog( "close" );
+				 
+				 }
+				 },
+				 "Отменить": function() {
+				 	$( this ).dialog( "close" );
+				 }
+				 },
+				 close: function() {
+				 	allFields.val( "" ).removeClass( "ui-state-error" );
+				 	$( this ).dialog( "close" );
+				 }
+			});
+			
+			$( "#dialog-confirm" ).dialog({
+				 autoOpen:false,
+				 resizable: false,
+				 height:300,
+				 width:350,
+				 modal: true,
+				 buttons: {
+					 "Удалить": function() {
+						 deleteGroup(deleteId.val());
+						 $( this ).dialog( "close" );
+					 },
+					 "Отмена": function() {
+						 $( this ).dialog( "close" );
+					 }
 				 }
 			});
 			
@@ -157,15 +164,103 @@
 			
 		});
 		
+		function editGroup(groupId, groupName, groupEnabled){
+			alert("groupId: " + groupId + " " + "groupNameЖ " + groupName + " " + "groupEnabled " + groupEnabled );
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupId = groupId;
+			dataToSend.groupName = groupName;
+			dataToSend.enabled = groupEnabled;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/editGroup",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							$('#grid').trigger( 'reloadGrid' );
+						}
+					/*getNextPage();*/
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		
+		function deleteGroup(groupId){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupId = groupId;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/deleteGroup",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							$('#grid').trigger( 'reloadGrid' );
+						}
+					/*getNextPage();*/
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		
+		function createGroup(groupName){
+			alert("groupName: " + groupName);
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupName = groupName;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/addGroup",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							$('#grid').trigger( 'reloadGrid' );
+						}
+					/*getNextPage();*/
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		
 		function createGrid(){
-			alert("URL: " + $.cookie("SERVER_HOST")+"json/getGroupList");
+			//alert("URL: " + $.cookie("SERVER_HOST")+"json/getGroupList");
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
 			dataToSend.numberFrom = "0";
 			dataToSend.numberOfItems = "20";
 			var jsonData = JSON.stringify(dataToSend);
-			alert("jsonData: " + jsonData);
+			//alert("jsonData: " + jsonData);
 			$("#grid").jqGrid({
 				url:$.cookie("SERVER_HOST")+"json/getGroupList",
 				datatype:'json',
@@ -273,7 +368,9 @@
 		}
 		
 		function addRow(){
+			$( "#dialog-form" ).dialog( "open" );
 			
+/*			
 			$("#grid").jqGrid('editGridRow','new',
 				{url:$.cookie("SERVER_HOST")+"quiz/json/addGroup",
 					editData:{},
@@ -285,7 +382,7 @@
 						alert("addingResult - "+response.errorData.errorCode);
 					}
 				}
-			);
+			);*/
 		}
 		
 		function editRow(){
@@ -304,19 +401,84 @@
 		}
 		
 		function deleteRow(){
-			alert("Are you want really to delete this group?")
-			
+			var s = $("#grid").jqGrid('getGridParam','selrow');
+			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
+			/*alert("1 - "+dataFromTheRow.groupDescription+"; 2 - "+dataFromTheRow.id+"; 3 - "+dataFromTheRow.groupName);*/
+			if(dataFromTheRow.id==null || dataFromTheRow.groupName == null){
+				alert("Пожалуйста, выберите группу для удаления");
+				return;
+			}
+			$("#delete_id").val(dataFromTheRow.id);
+			$("#delete_name").val(dataFromTheRow.groupName);
+			$("#delete_name").attr('disabled', 'disabled');
+			$( "#dialog-confirm" ).dialog( "open" );
+						
+		}
+		
+		function createQuestionInGroupsList(){
+			var groupId = $("#showQuestionsForGroup_id").val();
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupId = groupId;
+			//dataToSend.numberFrom = 0;
+			//dataToSend.numberOfItems = 1000;
+			var jsonData = JSON.stringify(dataToSend);
+			/*alert("jsonData: " + jsonData);*/
+			$("#questionsForGroupGrid").jqGrid({
+				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
+				datatype:'json',
+				mtype:"POST",
+				loadBeforeSend: function(xhr)
+				{
+				   xhr.setRequestHeader("Content-Type", "application/json");
+				   return xhr;
+				},
+				colNames:["ID","Текст вопроса","",""],
+				colModel:[
+				{name:'id', index:'id',width:20, editable:false, editoptions:{readonly:true, size:10},hidden:true},
+				{name:'questionText', index:'questionText', width:650, editable:true, editrules:{required:true}, editoptions:{size:10}},
+				{name:'parentId', index:'parentId', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
+				{name:'enabled', index:'enabled', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
+				
+				],
+				postData: jsonData,
+				rowNum:20,
+				//rowList:[20,40,60],
+				height:390,
+				autowidth:false,
+				rownumbers:true,
+				sortname:'id',
+				viewrecords:true,
+				sortorder:"asc",
+				caption:"Список вопросов",
+				emptyrecords:"Пустое поле",
+				loadonce:false,
+				loadcomplete:function(){},
+				jsonReader:{
+					root:"questionGroups",
+					//page:"page",
+					//total:"total",
+					//records:"records",
+					repeatitems:false,
+					//cell:"cell",
+					//id:"id"
+				}
+			});
+			/*alert("url: " + $.cookie("SERVER_HOST")+"json/getQuestionListForGroup " + " xhr: ");
+			alert("jsonData postData: " + jsonData);*/
 		}
 		
 		function showQuestionsList(){
+			
+			createQuestionInGroupsList();
+			
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
 			if(dataFromTheRow.id==null || dataFromTheRow.groupName == null){
-				alert("Пожалуйста, выберите группу для просмотра списка вопросов " + dataFromTheRow.id);
+				alert("Пожалуйста, выберите группу для просмотра списка вопросов!");
 				return;
 			}
-			
-			
 			
 			$("#showQuestionsForGroup_id").val(dataFromTheRow.id);
 			//alert("id Question Group: " + dataFromTheRow.id);
@@ -326,8 +488,8 @@
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
 			dataToSend.groupId = groupId;
-			dataToSend.numberFrom = 0;
-			dataToSend.numberOfItems = 1000;
+			//dataToSend.numberFrom = 0;
+			//dataToSend.numberOfItems = 1000;
 			var jsonData = JSON.stringify(dataToSend);
 			
 			//alert("data: " + jsonData + " " + userSession + " " + dataToSend.questionGroup);
@@ -336,7 +498,7 @@
 		    $("#questionsForGroupGrid").trigger('reloadGrid');
 			$( "#dialog-show_questions-for-group" ).dialog( "open" );
 			
-			createQuestionInGroupsList();
+			
 		}
 		
 		function closeForm(){
@@ -346,7 +508,7 @@
 			var jsonData = JSON.stringify(dataToSend);
 			$.ajax({
 				type:"POST",
-				url:$.cookie("SERVER_HOST")+"pages/finishUserSession",
+				url:$.cookie("SERVER_HOST")+"finishUserSession",
 				data: jsonData,
 				contentType: "application/json; charset=utf-8",
 				dataType: "json",
@@ -387,6 +549,16 @@
 			location=loc;
 
 		}
+		
+		function getQuestionsInGroups(){
+				var userSession = $.cookie("ADMIN_SESSION");
+				var loc = $.cookie("SERVER_HOST")+"pages/questionsInGroups?userSession="+userSession;
+				location=loc;
+			}
+			
+			
+		
+		
 	</script>
 
 </head>
@@ -408,7 +580,7 @@
 								<td>
 									<tr>
 										<li class="yellow2">
-											<p><a href="#">Вопросы в группе</a></p>
+											<p><a href="#" onClick="getQuestionsInGroups()">Список вопросов</a></p>
 										</li>
 									</tr>
 								</td>
@@ -447,13 +619,25 @@
 			</td>
 		</tr>
 	</table>
+
+<div id="dialog-form" title="Создать новую группу">
+	<p class="validateTips">Необходимо ввести все поля</p>
+	<form>
+		<fieldset>
+			<label for="name">Название группы</label>
+			<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+			</br>
+		</fieldset>
+	</form>
+</div>
 	
 <div id="dialog-show_questions-for-group" title="Список вопросов, которые входят в группу">
+	
 		<div width="100%" height="420px">
-			<div id="jqQuestionsForGroupGrid">
+			
 				<table id="questionsForGroupGrid"></table>
 				<div id="questionsForGroupPager"></div>
-			</div>
+			
 		</div>
 </div>
 
@@ -461,6 +645,8 @@
 	<p class="validateTips">Вы можете внести изменения в поля</p>
 	<form>
 		<fieldset>
+			<label for="edit_id" style="display:none">ID</label>
+			<input type="text" name="edit_id" id="edit_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
 			<label for="edit_name">Название группы</label>
 			</br>
 			<input type="text" name="edit_name" id="edit_name" class="text ui-widget-content ui-corner-all" />
@@ -469,6 +655,18 @@
 		</fieldset>
 	</form>
 </div>
+
+<div id="dialog-confirm" title="Вы уверены что хотите удалить группу?">
+	<form>
+		<fieldset>
+			<input type="text" name="delete_id" id="delete_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+			<label for="edit_name">Название группы</label>
+			<input type="text" name="delete_name" id="delete_name" class="text ui-widget-content ui-corner-all" />
+		</fieldset>
+	</form>
+	<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>Данные о группе будут удалены без возможности восстановления</p>
+</div>
+
 </body>
 
 </html>

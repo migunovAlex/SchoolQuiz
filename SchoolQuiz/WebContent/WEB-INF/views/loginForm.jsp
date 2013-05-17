@@ -25,7 +25,7 @@
 			
 			var serverHost = $.cookie("SERVER_HOST");
 			if(serverHost==null){
-				$.cookie("SERVER_HOST","http://http://192.168.0.100:8090/schoolQuiz/quiz/");
+				$.cookie("SERVER_HOST","http://localhost:8090/schoolQuiz/quiz/");
 			}
 			
 			$(document).mouseup(function(){
