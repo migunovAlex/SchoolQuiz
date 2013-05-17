@@ -1,13 +1,13 @@
-package com.schoolquiz.entity.admin;
+package com.schoolquiz.entity.admin.response;
 
 import com.schoolquiz.entity.ErrorData;
 
-public class CheckSessionSummary {
+public class AddAnswerResponse {
 	
 	private ErrorData errorData;
-	private String userSession;
+	private Boolean result;
 	
-	public CheckSessionSummary(){
+	public AddAnswerResponse(){
 		errorData = new ErrorData();
 	}
 	
@@ -17,11 +17,11 @@ public class CheckSessionSummary {
 	public void setErrorData(ErrorData errorData) {
 		this.errorData = errorData;
 	}
-	public String getUserSession() {
-		return userSession;
+	public Boolean getResult() {
+		return result;
 	}
-	public void setUserSession(String userSession) {
-		this.userSession = userSession;
+	public void setResult(Boolean result) {
+		this.result = result;
 	}
 	
 	

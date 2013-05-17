@@ -5,10 +5,11 @@ import com.schoolquiz.entity.ErrorData;
 public class OperationGroupResponse {
 	
 	private ErrorData errorData;
-	private Boolean added;
+	private Boolean result;
 	
 	public OperationGroupResponse(){
 		errorData = new ErrorData();
+		result = false;
 	}
 	
 	public ErrorData getErrorData() {
@@ -17,16 +18,16 @@ public class OperationGroupResponse {
 	public void setErrorData(ErrorData errorData) {
 		this.errorData = errorData;
 	}
-	public Boolean getAdded() {
-		return added;
+	public Boolean getResult() {
+		return result;
 	}
-	public void setAdded(Boolean added) {
-		this.added = added;
+	public void setResult(Boolean result) {
+		this.result = result;
 	}
 	
 	@Override
 	public String toString(){
-		return "errorData - "+errorData+"; added - "+added;
+		return "errorData - "+errorData+"; added - "+result;
 	}
 	
 
