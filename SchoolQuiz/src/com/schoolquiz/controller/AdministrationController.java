@@ -26,6 +26,7 @@ import com.schoolquiz.entity.admin.request.EditGroupRequest;
 import com.schoolquiz.entity.admin.request.EditQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetAnswerRequest;
 import com.schoolquiz.entity.admin.request.GetAnswersForQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetGroupsDictRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
@@ -37,6 +38,7 @@ import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
 import com.schoolquiz.entity.admin.response.EditAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
+import com.schoolquiz.entity.admin.response.GetGroupsDictResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
@@ -188,6 +190,11 @@ public class AdministrationController {
 		System.out.println("Recieved request to delete answer - "+deleteAnswerRequest);
 		
 		return adminService.deleteAnswer(deleteAnswerRequest);
+	}
+	
+	@RequestMapping(value="/getGroupDict", method=RequestMethod.POST)
+	public @ResponseBody GetGroupsDictResponse getGroupsDict(@RequestBody GetGroupsDictRequest getGroupsDictRequest){
+		return adminService.getGroupsDict(getGroupsDictRequest);
 	}
 	
 

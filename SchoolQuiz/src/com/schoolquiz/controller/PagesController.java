@@ -3,24 +3,12 @@ package com.schoolquiz.controller;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.schoolquiz.entity.ErrorData;
 import com.schoolquiz.entity.admin.CheckSessionSummary;
-import com.schoolquiz.entity.admin.FinishSessionSummary;
-import com.schoolquiz.entity.admin.OperationGroupResponse;
-import com.schoolquiz.entity.admin.decorated.AdminUserSessionSummary;
-import com.schoolquiz.entity.admin.decorated.CustomQuestionGroupResponse;
-import com.schoolquiz.entity.admin.request.AddGroupRequest;
-import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
-import com.schoolquiz.entity.admin.request.EditGroupRequest;
-import com.schoolquiz.entity.admin.request.GroupRequest;
-import com.schoolquiz.entity.admin.request.UserCredentials;
-import com.schoolquiz.entity.admin.request.UserSession;
 import com.schoolquiz.service.AdminUserService;
 import com.schoolquiz.service.QuizService;
 

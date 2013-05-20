@@ -31,6 +31,7 @@ import com.schoolquiz.entity.admin.request.EditGroupRequest;
 import com.schoolquiz.entity.admin.request.EditQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetAnswerRequest;
 import com.schoolquiz.entity.admin.request.GetAnswersForQuestionRequest;
+import com.schoolquiz.entity.admin.request.GetGroupsDictRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
@@ -38,9 +39,11 @@ import com.schoolquiz.entity.admin.request.UserSession;
 import com.schoolquiz.entity.admin.response.AddAnswerResponse;
 import com.schoolquiz.entity.admin.response.AnswerEntity;
 import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
+import com.schoolquiz.entity.admin.response.DictItem;
 import com.schoolquiz.entity.admin.response.EditAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
+import com.schoolquiz.entity.admin.response.GetGroupsDictResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
@@ -661,6 +664,32 @@ public class AdminUserServiceImpl implements AdminUserService {
 		
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		return operationResponse;
+	}
+
+	@Override
+	public GetGroupsDictResponse getGroupsDict(GetGroupsDictRequest getGroupsDictRequest) {
+		GetGroupsDictResponse response = new GetGroupsDictResponse();
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getGroupsDictRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			response.setErrorData(checkAdminSessionRes.getErrorData());
+			return response;
+		}
+		
+		List<QuestionGroup> questionGroups = quizDao.getQuestionGroups(0, Integer.MAX_VALUE);
+		List<DictItem> dictItems = new ArrayList<>();
+		
+		for(QuestionGroup questionGroup:questionGroups){
+			if(questionGroup.getDeleted()) continue;
+			DictItem dictItem = new DictItem();
+			dictItem.setId(questionGroup.getId());
+			dictItem.setText(questionGroup.getGroupName());
+			dictItems.add(dictItem);
+		}
+		
+		response.setDictItems(dictItems);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
+		return response;
 	}
 
 
