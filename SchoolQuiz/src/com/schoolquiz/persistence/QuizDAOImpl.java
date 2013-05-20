@@ -355,5 +355,16 @@ public class QuizDAOImpl implements QuizDAO{
 		return answerToEdit;
 	}
 
+	@Override
+	public List<Answer> searchAnswers(String keyWord) {
+		List<Answer> answerList = null;
+		if(keyWord==null){
+			keyWord = "";
+		}
+		answerList = currentSession().createCriteria(Answer.class).add(Restrictions.ilike("answerText", keyWord+"%")).list();
+		
+		return answerList;
+	}
+
 
 }

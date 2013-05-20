@@ -7,6 +7,7 @@ import com.schoolquiz.entity.admin.OperationGroupResponse;
 import com.schoolquiz.entity.admin.decorated.AdminUserSessionSummary;
 import com.schoolquiz.entity.admin.decorated.CustomQuestionGroupResponse;
 import com.schoolquiz.entity.admin.request.AddAnswerRequest;
+import com.schoolquiz.entity.admin.request.AddAnswersToQuestionRequest;
 import com.schoolquiz.entity.admin.request.AddGroupRequest;
 import com.schoolquiz.entity.admin.request.AddQuestionRequest;
 import com.schoolquiz.entity.admin.request.DeleteAnswerRequest;
@@ -16,20 +17,25 @@ import com.schoolquiz.entity.admin.request.EditAnswerRequest;
 import com.schoolquiz.entity.admin.request.EditGroupRequest;
 import com.schoolquiz.entity.admin.request.EditQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetAnswerRequest;
+import com.schoolquiz.entity.admin.request.GetAnswerSearchRequest;
 import com.schoolquiz.entity.admin.request.GetAnswersForQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetGroupsDictRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
+import com.schoolquiz.entity.admin.request.RemoveAnswersFromQuestionRequest;
 import com.schoolquiz.entity.admin.response.AddAnswerResponse;
+import com.schoolquiz.entity.admin.response.AddAnswersToQuestionResponse;
 import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
 import com.schoolquiz.entity.admin.response.EditAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerResponse;
+import com.schoolquiz.entity.admin.response.GetAnswerSearchResponse;
 import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetGroupsDictResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
+import com.schoolquiz.entity.admin.response.RemoveAnswersFromQuestionResponse;
 
 public interface AdminUserService {
 	
@@ -72,6 +78,12 @@ public interface AdminUserService {
 	public DeleteAnswerResponse deleteAnswer(DeleteAnswerRequest deleteAnswerRequest);
 
 	public GetGroupsDictResponse getGroupsDict(GetGroupsDictRequest getGroupsDictRequest);
+
+	public GetAnswerSearchResponse getAnswerSearch(GetAnswerSearchRequest getAnswerSearchRequest);
+
+	public AddAnswersToQuestionResponse addAnswersToQuestion(AddAnswersToQuestionRequest addAnswersToQuestionRequest);
+
+	public RemoveAnswersFromQuestionResponse removeAnswersFromQuestion(RemoveAnswersFromQuestionRequest removeAnswersFromQuestionRequest);
 
 
 }
