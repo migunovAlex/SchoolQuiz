@@ -168,4 +168,8 @@ http://localhost:8090/schoolQuiz/quiz/json/deleteAnswer
 "answerId":"29"
 
 
-
+http://localhost:8090/schoolQuiz/quiz/json/getAnswerSearch
+получение списка ответов по ключевому слову
+параметры:
+"userSession":"WB23J37AFHP0QGF8Q59M",
+"keyWord":"ст"
