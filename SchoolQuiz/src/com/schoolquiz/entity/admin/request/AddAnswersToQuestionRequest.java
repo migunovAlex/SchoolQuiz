@@ -7,6 +7,7 @@ public class AddAnswersToQuestionRequest {
 	private String userSession;
 	private Long questionId;
 	private List<Long> answerIds;
+	private List<Boolean> rightAnswers;
 	
 	public String getUserSession() {
 		return userSession;
@@ -25,6 +26,12 @@ public class AddAnswersToQuestionRequest {
 	}
 	public void setAnswerIds(List<Long> answerIds) {
 		this.answerIds = answerIds;
+	}
+	public List<Boolean> getRightAnswers() {
+		return rightAnswers;
+	}
+	public void setRightAnswers(List<Boolean> rightAnswers) {
+		this.rightAnswers = rightAnswers;
 	}
 	
 	

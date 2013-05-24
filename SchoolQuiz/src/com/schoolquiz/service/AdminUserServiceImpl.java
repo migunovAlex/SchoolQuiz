@@ -2,6 +2,7 @@ package com.schoolquiz.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.schoolquiz.entity.Answer;
 import com.schoolquiz.entity.ErrorData;
 import com.schoolquiz.entity.Question;
+import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.admin.AdminUser;
 import com.schoolquiz.entity.admin.AdminUserSession;
@@ -728,14 +730,105 @@ public class AdminUserServiceImpl implements AdminUserService {
 
 	@Override
 	public AddAnswersToQuestionResponse addAnswersToQuestion(AddAnswersToQuestionRequest addAnswersToQuestionRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		AddAnswersToQuestionResponse response = new AddAnswersToQuestionResponse();
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(addAnswersToQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			response.setErrorData(checkAdminSessionRes.getErrorData());
+			return response;
+		}
+		
+		if(addAnswersToQuestionRequest.getAnswerIds()==null|| addAnswersToQuestionRequest.getAnswerIds().size()==0 ||
+				addAnswersToQuestionRequest.getAnswerIds().size()!=addAnswersToQuestionRequest.getRightAnswers().size()){
+			response.getErrorData().setErrorCode(ErrorData.WRONG_PARAMS);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_WRONG_PARAMS);
+			return response;
+		}
+		
+		Question question = quizDao.getQuestionWithAnswers(addAnswersToQuestionRequest.getQuestionId());
+		
+		if(question==null){
+			response.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return response;
+		}
+		
+		
+		for(int i=0; i<addAnswersToQuestionRequest.getAnswerIds().size();i++){
+			Long answerId = addAnswersToQuestionRequest.getAnswerIds().get(i);
+			List<QuestionAnswer> questionAnswerList = question.getQuestionAnswerList();
+			Boolean answerExists = false;
+			if(questionAnswerList==null) questionAnswerList = new ArrayList<>();
+			
+			
+			if(!answerExists){
+				Answer answerToAdd = quizDao.getAnswer(answerId);
+				if(answerToAdd==null) continue;
+				QuestionAnswer questionAnswer = new QuestionAnswer();
+				questionAnswer.setQuestion(question);
+				questionAnswer.setAnswer(answerToAdd);
+				questionAnswer.setRight(addAnswersToQuestionRequest.getRightAnswers().get(i));
+				question.getQuestionAnswerList().add(questionAnswer);
+			}
+		}
+		
+		question = quizDao.updateQuestion(question);
+		
+		if(question==null){
+			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return response;
+		}
+		
+		
+		response.setOperationResult(true);
+		
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return response;
 	}
 
 	@Override
 	public RemoveAnswersFromQuestionResponse removeAnswersFromQuestion(RemoveAnswersFromQuestionRequest removeAnswersFromQuestionRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		RemoveAnswersFromQuestionResponse response = new RemoveAnswersFromQuestionResponse();
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(removeAnswersFromQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			response.setErrorData(checkAdminSessionRes.getErrorData());
+			return response;
+		}
+		
+		if(removeAnswersFromQuestionRequest.getAnswerIds()==null|| removeAnswersFromQuestionRequest.getAnswerIds().size()==0){
+			response.getErrorData().setErrorCode(ErrorData.WRONG_PARAMS);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_WRONG_PARAMS);
+			return response;
+		}
+		
+		Question question = quizDao.getQuestionWithAnswers(removeAnswersFromQuestionRequest.getQuestionId());
+		
+		if(question==null){
+			response.getErrorData().setErrorCode(ErrorData.NO_SUCH_QUESTION);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_QUESTION);
+			return response;
+		}
+		
+		Iterator<QuestionAnswer> answerIterator = question.getQuestionAnswerList().iterator();
+		
+		for(Long deleteId: removeAnswersFromQuestionRequest.getAnswerIds()){
+			while(answerIterator.hasNext()){
+				QuestionAnswer questionAnswer = answerIterator.next();
+				if(deleteId == questionAnswer.getAnswer().getId()){
+					answerIterator.remove();
+				}
+			}
+		}
+		
+		question = quizDao.updateQuestion(question);
+		if(question==null){
+			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return response;
+		}
+		response.setOperationResult(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return response;
 	}
 
 

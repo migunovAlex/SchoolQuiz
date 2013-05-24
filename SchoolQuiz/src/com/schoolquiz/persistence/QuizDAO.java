@@ -66,6 +66,8 @@ public interface QuizDAO {
 	public Answer updateAnswer(Answer answerToEdit);
 
 	public List<Answer> searchAnswers(String keyWord);
+
+	public Question getQuestionWithAnswers(Long questionId);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

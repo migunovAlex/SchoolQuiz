@@ -9,6 +9,7 @@ public class AddAnswersToQuestionResponse {
 	
 	public AddAnswersToQuestionResponse(){
 		errorData = new ErrorData();
+		operationResult = false;
 	}
 
 	public ErrorData getErrorData() {
