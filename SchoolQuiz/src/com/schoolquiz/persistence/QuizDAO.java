@@ -68,6 +68,10 @@ public interface QuizDAO {
 	public List<Answer> searchAnswers(String keyWord);
 
 	public Question getQuestionWithAnswers(Long questionId);
+
+	public QuestionAnswer addQuestionAnswer(QuestionAnswer questionAnswer);
+
+	public QuestionAnswer deleteQuestionAnswer(QuestionAnswer questionAnswer);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

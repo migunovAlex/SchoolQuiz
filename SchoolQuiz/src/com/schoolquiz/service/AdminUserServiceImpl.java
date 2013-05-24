@@ -759,6 +759,13 @@ public class AdminUserServiceImpl implements AdminUserService {
 			Boolean answerExists = false;
 			if(questionAnswerList==null) questionAnswerList = new ArrayList<>();
 			
+			for(QuestionAnswer questionAnswer : questionAnswerList){
+				if(answerId == questionAnswer.getAnswer().getId()){
+					answerExists = true;
+					break;
+				}
+			}
+			
 			
 			if(!answerExists){
 				Answer answerToAdd = quizDao.getAnswer(answerId);
@@ -767,16 +774,13 @@ public class AdminUserServiceImpl implements AdminUserService {
 				questionAnswer.setQuestion(question);
 				questionAnswer.setAnswer(answerToAdd);
 				questionAnswer.setRight(addAnswersToQuestionRequest.getRightAnswers().get(i));
-				question.getQuestionAnswerList().add(questionAnswer);
+				questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
+				if(questionAnswer==null){
+					response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+					response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+					return response;
+				}
 			}
-		}
-		
-		question = quizDao.updateQuestion(question);
-		
-		if(question==null){
-			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
-			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
-			return response;
 		}
 		
 		
@@ -815,17 +819,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 			while(answerIterator.hasNext()){
 				QuestionAnswer questionAnswer = answerIterator.next();
 				if(deleteId == questionAnswer.getAnswer().getId()){
-					answerIterator.remove();
+					questionAnswer = quizDao.deleteQuestionAnswer(questionAnswer);
+					if(question==null){
+						response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+						response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+						return response;
+					}
 				}
 			}
 		}
 		
-		question = quizDao.updateQuestion(question);
-		if(question==null){
-			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
-			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
-			return response;
-		}
+		
 		response.setOperationResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 		return response;

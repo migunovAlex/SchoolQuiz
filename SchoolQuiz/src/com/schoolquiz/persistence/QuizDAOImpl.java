@@ -1,6 +1,5 @@
 package com.schoolquiz.persistence;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +21,6 @@ import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.UserAnswer;
 import com.schoolquiz.entity.UserResult;
 import com.schoolquiz.entity.admin.response.AnswerEntity;
-import com.schoolquiz.entity.decorated.QuestionSummary;
 import com.schoolquiz.utils.SessionGenerator;
 
 @Transactional
@@ -153,6 +151,7 @@ public class QuizDAOImpl implements QuizDAO{
 		} catch(Exception e){
 			return null;
 		}
+		currentSession().flush();
 		return answer;
 	}
 
@@ -381,6 +380,27 @@ public class QuizDAOImpl implements QuizDAO{
 		}
 		
 		return resultQuestion;
+	}
+
+	@Override
+	public QuestionAnswer addQuestionAnswer(QuestionAnswer questionAnswer) {
+		try{
+			Long id = (Long) currentSession().save(questionAnswer);
+			questionAnswer.setId(id);
+		}catch(Exception e){
+			return null;
+		}
+		return questionAnswer;
+	}
+
+	@Override
+	public QuestionAnswer deleteQuestionAnswer(QuestionAnswer questionAnswer) {
+		try{
+			currentSession().delete(questionAnswer);
+		}catch(Exception e){
+			return null;
+		}
+		return questionAnswer;
 	}
 
 
