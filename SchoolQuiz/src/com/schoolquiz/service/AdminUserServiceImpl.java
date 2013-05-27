@@ -759,12 +759,23 @@ public class AdminUserServiceImpl implements AdminUserService {
 			Boolean answerExists = false;
 			if(questionAnswerList==null) questionAnswerList = new ArrayList<>();
 			
-			for(QuestionAnswer questionAnswer : questionAnswerList){
-				if(answerId == questionAnswer.getAnswer().getId()){
+			Iterator<QuestionAnswer> iter = questionAnswerList.iterator();
+			QuestionAnswer qAnswer = null;
+			while(iter.hasNext()){
+				qAnswer = iter.next();
+				if(answerId==qAnswer.getAnswer().getId()){
 					answerExists = true;
 					break;
 				}
 			}
+			
+			
+			/*for(QuestionAnswer questionAnswer : questionAnswerList){
+				if(answerId == questionAnswer.getAnswer().getId()){
+					answerExists = true;
+					break;
+				}
+			}*/
 			
 			
 			if(!answerExists){
@@ -774,15 +785,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 				questionAnswer.setQuestion(question);
 				questionAnswer.setAnswer(answerToAdd);
 				questionAnswer.setRight(addAnswersToQuestionRequest.getRightAnswers().get(i));
-				questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
-				if(questionAnswer==null){
-					response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
-					response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
-					return response;
-				}
+//				questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
+//				if(questionAnswer==null){
+//					response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+//					response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+//					return response;
+//				}
+				question.getQuestionAnswerList().add(questionAnswer);
 			}
 		}
 		
+		question = quizDao.updateQuestion(question);
 		
 		response.setOperationResult(true);
 		

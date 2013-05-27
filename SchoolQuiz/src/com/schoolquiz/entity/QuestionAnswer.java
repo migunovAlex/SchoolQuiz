@@ -1,7 +1,9 @@
 package com.schoolquiz.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,16 +20,16 @@ public class QuestionAnswer {
 	@Column(name="ID")
 	private Long id;
 	
-	@ManyToOne
+	@ManyToOne(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="QUESTION_ID")
 	private Question question;
 	
-	@ManyToOne
+	@ManyToOne(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ANSWER_ID")
 	private Answer answer;
 	
 	@Column(name="RIGHT")
-	private boolean right;
+	private Boolean right;
 
 	public Long getId() {
 		return id;
@@ -53,11 +55,11 @@ public class QuestionAnswer {
 		this.answer = answer;
 	}
 
-	public boolean isRight() {
+	public Boolean isRight() {
 		return right;
 	}
 
-	public void setRight(boolean right) {
+	public void setRight(Boolean right) {
 		this.right = right;
 	}
 	

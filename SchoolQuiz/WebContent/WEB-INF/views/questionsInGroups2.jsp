@@ -6,6 +6,7 @@
 <html>
 <head>
 
+
 	<link rel="stylesheet" type="text/css" href="../../css/jquery-ui-1.9.0.custom.css" />
  	<link rel="stylesheet" type="text/css" href="../../css/ui.jqgrid.css" />
 	<link rel="stylesheet" type="text/css" href="../../css/mainMenuStyles.css" />
@@ -15,8 +16,9 @@
 	 <script type="text/javascript" src="../../js/jquery.easing.1.3.js"></script>
 	 <script type="text/javascript" src="../../js/grid.locale-ru.js"></script>
 	 <script type="text/javascript" src="../../js/jquery.jqGrid.min.js"></script>
-	 <script type="text/javascript" src="../../js/jquery-ui.js"></script>	 
-	 
+	 <script type="text/javascript" src="../../js/jquery-ui.js"></script>
+	
+
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Список Вопросов</title>
 <script type="text/javascript">
@@ -31,9 +33,13 @@
 				$(this).stop().animate({height:'70px'},{queue:false, duration:300, easing:'easeOutBounce'});
 			});
 			
-			/*loadQuestionGroups();*/
+			loadQuestionGroups();
 			createGrid(indexIdGroup);
 		});
+		
+			
+		
+		
 		
 		function checkLength( o, n, min, max ) {
 			 if ( o.val().length > max || o.val().length < min ) {
@@ -47,6 +53,18 @@
 		};
 		
 		function loadQuestionGroups(){
+		    /*$('#list').combobox({  
+		        url:null, 
+		        mode:'local',
+		        valueField:'id',  
+		        textField:'text',
+		        onSelect: function(param){
+		    		loadGridData(param.id);
+		    		indexIdGroup = param.id;
+		   	}
+		    
+		    });*/
+		    
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
@@ -88,6 +106,8 @@
 		
 		function loadGridData(groupId){
 			
+			//createGrid(groupId);
+			
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
@@ -111,6 +131,7 @@
 						 	$("#grid").jqGrid('setGridParam', { postData: jsonData });
 							$('#grid').trigger( 'reloadGrid' );
 						}
+					/*getNextPage();*/
 				},
 				failure: function(errMsg){alert(errMsg);}
 			});
@@ -231,46 +252,9 @@
 			
 		}
 		
-		$(function(){
-			
-			var textQuestion = $("#text_question"),
-			allFields = $([]).add(textQuestion);
-			
-			$( "#dialog-formEdit" ).dialog({
-				 autoOpen: false,
-				 height: 300,
-				 width: 650,
-				 modal: true,
-				 buttons: {
-				 "Сохранить ответ": function() {
-				 var bValid = true;
-				 allFields.removeClass( "ui-state-error" );
-				 bValid = bValid && checkLength( textQuestion, "textQuestion", 3, 150);
-				// bValid = bValid && checkLength( editDescription, "edit_description", 3, 200 );
-				 if ( bValid ) {
-					 $( "#users tbody" ).append( "<tr>" +
-					 "<td>" + textQuestion.val() + "</td>" +
-					 //"<td>" + editDescription.val() + "</td>" +
-					 "</tr>" );
-					/* editAnswer(editId.val(), editName.val(), true);*/
-					 $( this ).dialog( "close" );
-				 	
-				 }
-				 },
-				 "Отменить": function() {
-				 	$( this ).dialog( "close" );
-				 }
-				 },
-				 close: function() {
-				 	allFields.val( "" ).removeClass( "ui-state-error" );
-				 	$( this ).dialog( "close" );
-				 }
-			})
-		});
-		
 		function addRow(){
 			alert("Add new ROW!");
-			$( "#dialog-form" ).dialog( "open" );
+			//$( "#dialog-form" ).dialog( "open" );
 		}
 		
 		function editRow(){
@@ -283,6 +267,8 @@
 			}
 			$("#edit_id").val(dataFromTheRow.id);
 			$("#edit_name").val(dataFromTheRow.answerText);
+			
+			/*$( "#dialog-formEdit" ).dialog( "open" );*/
 		}
 		
 		function deleteRow(){
@@ -291,6 +277,13 @@
 		
 		function showQuestionsList(){
 					
+		}
+		
+		function getListGroup(){
+			var e = document.getElementById("list");
+    		var groupId = e.options[e.selectedIndex].value;
+    		
+			loadGridData(groupId);
 		}
 		
 		function getGroupOfQuestions(groupId) {
@@ -307,13 +300,6 @@
 		        }
 		    });
 		    return false;
-		}
-		
-		function getListGroup(){
-			var e = document.getElementById("list");
-    		var groupId = e.options[e.selectedIndex].value;
-    		
-			loadGridData(groupId);
 		}
 		
 		function createQuestion(questionText, responseType, questionGroup, questionParentId, enabled){
@@ -347,32 +333,21 @@
 			});
 		};
 		
+	
+		
 </script>
 </head>
 <body>
-	<div id="dialog-form" title="Создать новый вопрос">
-		<p class="validateTips">Необходимо ввести все поля</p>
-		<form>
-			<fieldset>
-				<label for="text_question">Текст вопроса</label>
-				<input type="text" name="text_question" id="text_question" class="text ui-widget-content ui-corner-all" />
-				</br>
-			</fieldset>
-		</form>
-	</div>
 	<div>
 		<p>Выберите группу вопросов:</p>
-		<!-- <select id="list" onchange="getListGroup()">
-	   		<option disabled>Выберите группу вопросов</option>
-	    </select>-->
-		
-	<!--	<div class="jquery-selectbox jquery-custom-selectboxes-replaced" style="width: 201.16px;">
-		<div class="jquery-selectbox-moreButton"></div>
-		<div class="jquery-selectbox-list jquery-custom-selectboxes-replaced-list" style="width: 196px; height: 9em; display: none;"></div>-->
+		<!-- <select id="list" class="easyui-combobox" name="list" style="width:200px;" onClick="getListGroup"></select>-->
+		<select id="list" onchange="getListGroup()">
+	   	 <option disabled>Выберите группу вопросов</option>
+	    </select>
 	</div>
 	</br>
 	<table width="100%" id="positionTable">
-
+		<tr>
 			<td width="100% - 200px">
 				<div id="jqgrid">
 					<table id="grid"></table>
@@ -383,8 +358,18 @@
 		</tr>
 	</table>
 	
-
-
-		
-	</body>
+	<div id="dialog-form" title="Создать новый ответ">
+		<p class="validateTips">Необходимо ввести все поля</p>
+		<form>
+			<fieldset>
+				<label for="name">Текст ответа</label>
+				<input type="text" name="answerText" id="answerText" width="250" class="text ui-widget-content ui-corner-all" />
+				</br>
+				<input type="checkbox" name="option1" value="a1" checked>enable<br>
+				</br>
+			</fieldset>
+		</form>
+	</div>
+	
+</body>
 </html>

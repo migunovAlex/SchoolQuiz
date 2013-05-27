@@ -7,6 +7,9 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
+import com.schoolquiz.entity.Answer;
+import com.schoolquiz.entity.Question;
+import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
 import com.schoolquiz.entity.UserResult;
 import com.schoolquiz.entity.admin.AdminUser;
@@ -23,6 +26,7 @@ import com.schoolquiz.entity.domain.QuestionOutSummary;
 import com.schoolquiz.entity.domain.QuizOutResultSummary;
 import com.schoolquiz.entity.domain.UserResultJsonOutSummary;
 import com.schoolquiz.persistence.AdminDAO;
+import com.schoolquiz.persistence.QuizDAO;
 import com.schoolquiz.service.AdminUserService;
 import com.schoolquiz.service.QuizService;
 
@@ -34,8 +38,24 @@ public class MainTest {
 		AdminUserService adminUserService = (AdminUserService) ctx.getBean("adminService");
 		
 		AdminUserSessionSummary userSession = adminUserService.checkUser("admin", "nimda");
-		CustomQuestionGroupResponse result = adminUserService.getGroupsForAdmin(userSession.getAdminUserSession().getSession(), 0, 5);
-		System.out.println(result);
+//		CustomQuestionGroupResponse result = adminUserService.getGroupsForAdmin(userSession.getAdminUserSession().getSession(), 0, 5);
+//		System.out.println(result);
+		QuizDAO quizDao = (QuizDAO) ctx.getBean("quizDAO");
+		
+		Question question = quizDao.getQuestion(1L);
+		System.out.println(question);
+		
+		Answer answer = quizDao.getAnswer(23L);
+		System.out.println(answer);
+		
+		QuestionAnswer questionAnswer = new QuestionAnswer();
+		questionAnswer.setAnswer(answer);
+		questionAnswer.setQuestion(question);
+		questionAnswer.setRight(true);
+		
+		questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
+		System.out.println(questionAnswer);
+		
 //		System.out.println(userSession);
 		
 //		AdminDAO adminDao = (AdminDAO) ctx.getBean("adminUserDAO");
