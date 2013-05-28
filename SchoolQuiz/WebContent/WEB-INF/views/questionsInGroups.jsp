@@ -31,8 +31,44 @@
 				$(this).stop().animate({height:'70px'},{queue:false, duration:300, easing:'easeOutBounce'});
 			});
 			
-			/*loadQuestionGroups();*/
 			createGrid(indexIdGroup);
+			loadQuestionGroups();
+		});
+		
+		$(function(){
+			
+			var answerText = $("#answerText"),
+			allFields = $([]).add(answerText);
+			
+			$( "#dialog-form" ).dialog({
+				
+				 autoOpen: false,
+				 height: 320,
+				 width: 350,
+				 modal: true,
+				 buttons: {
+				 "Сохранить": function() {
+				 var bValid = true;
+				 allFields.removeClass( "ui-state-error" );
+				 bValid = bValid && checkLength(answerText, "answerText", 3, 150);
+				 if ( bValid ) {
+					 $( "#users tbody" ).append( "<tr>" +
+					 "<td>" + textQuestion.val() + "</td>" + "</tr>" );
+					 alert("Create group");
+					 $( this ).dialog( "close" );
+				 
+				 }
+				 },
+				 "Отменить": function() {
+				 	$( this ).dialog( "close" );
+				 }
+				 },
+				 close: function() {
+				 	allFields.val( "" ).removeClass( "ui-state-error" );
+				 	$( this ).dialog( "close" );
+				 }
+			});
+			
 		});
 		
 		function checkLength( o, n, min, max ) {
@@ -46,7 +82,39 @@
 			 }
 		};
 		
+	function loadGridData(groupId){
+			
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupId = groupId;
+			var jsonData = JSON.stringify(dataToSend);
+
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+						 	$("#grid").jqGrid('setGridParam', { postData: jsonData });
+							$('#grid').trigger( 'reloadGrid' );
+						}
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		};
+		
+		
 		function loadQuestionGroups(){
+		   	    
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
@@ -86,44 +154,13 @@
 		    
 		};
 		
-		function loadGridData(groupId){
-			
-			var userSession = $.cookie("ADMIN_SESSION");
-			var dataToSend = new Object();
-			dataToSend.userSession = userSession;
-			dataToSend.groupId = groupId;
-			var jsonData = JSON.stringify(dataToSend);
-
-			$.ajax({
-				type:"POST",
-				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
-				data: jsonData,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function(data){
-					var errorCode = data.errorData.errorCode;
-					if(errorCode!=200){
-						alert(data.errorData.errorDescription);
-
-						return;
-					}else
-						{
-						 	$("#grid").jqGrid('setGridParam', { postData: jsonData });
-							$('#grid').trigger( 'reloadGrid' );
-						}
-				},
-				failure: function(errMsg){alert(errMsg);}
-			});
-		};
+		
 		
 		function createGrid(groupId){
-			//alert("URL: " + $.cookie("SERVER_HOST")+"json/getGroupList");
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
 			dataToSend.groupId = groupId;
-			//dataToSend.numberFrom = "0";
-			//dataToSend.numberOfItems = "20";
 			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
 				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
@@ -144,7 +181,7 @@
 					postData: jsonData,
 					rowNum:20,
 					//rowList:[20,40,60],
-					height:500,
+					height:440,
 					autowidth:true,
 					rownumbers: true,
 					pager:'#pager',
@@ -165,6 +202,8 @@
 						//id:"id"
 					}
 			});
+			
+			
 			
 			$("#grid").jqGrid('navGrid','#pager',
 				{edit:false, add:false, del:false, search:true},
@@ -231,82 +270,20 @@
 			
 		}
 		
-		$(function(){
-			
-			var textQuestion = $("#text_question"),
-			allFields = $([]).add(textQuestion);
-			
-			$( "#dialog-formEdit" ).dialog({
-				 autoOpen: false,
-				 height: 300,
-				 width: 650,
-				 modal: true,
-				 buttons: {
-				 "Сохранить ответ": function() {
-				 var bValid = true;
-				 allFields.removeClass( "ui-state-error" );
-				 bValid = bValid && checkLength( textQuestion, "textQuestion", 3, 150);
-				// bValid = bValid && checkLength( editDescription, "edit_description", 3, 200 );
-				 if ( bValid ) {
-					 $( "#users tbody" ).append( "<tr>" +
-					 "<td>" + textQuestion.val() + "</td>" +
-					 //"<td>" + editDescription.val() + "</td>" +
-					 "</tr>" );
-					/* editAnswer(editId.val(), editName.val(), true);*/
-					 $( this ).dialog( "close" );
-				 	
-				 }
-				 },
-				 "Отменить": function() {
-				 	$( this ).dialog( "close" );
-				 }
-				 },
-				 close: function() {
-				 	allFields.val( "" ).removeClass( "ui-state-error" );
-				 	$( this ).dialog( "close" );
-				 }
-			})
-		});
-		
 		function addRow(){
-			alert("Add new ROW!");
 			$( "#dialog-form" ).dialog( "open" );
 		}
 		
 		function editRow(){
-			var s = $("#grid").jqGrid('getGridParam','selrow');
-			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
-			/*alert("1 - "+dataFromTheRow.groupDescription+"; 2 - "+dataFromTheRow.id+"; 3 - "+dataFromTheRow.groupName);*/
-			if(dataFromTheRow.id==null || dataFromTheRow.answerText == null){
-				alert("Пожалуйста, выберите ответ для редактирования");
-				return;
-			}
-			$("#edit_id").val(dataFromTheRow.id);
-			$("#edit_name").val(dataFromTheRow.answerText);
+			alert("Edit form");
 		}
 		
 		function deleteRow(){
-			
+			alert("Delete Form");
 		}
 		
 		function showQuestionsList(){
-					
-		}
-		
-		function getGroupOfQuestions(groupId) {
-		    $.ajax({
-		        type: "POST",
-		        url:$.cookie("SERVER_HOST")+"json/getGroupList",
-		        data: "{'countryId':" + (countryId) + "}",
-		        contentType: "application/json; charset=utf-8",
-		        global: false,
-		        async: false,
-		        dataType: "json",
-		        success: function(jsonObj) {
-		            alert(jsonObj.d);
-		        }
-		    });
-		    return false;
+			alert("Show question List");		
 		}
 		
 		function getListGroup(){
@@ -316,59 +293,43 @@
 			loadGridData(groupId);
 		}
 		
-		function createQuestion(questionText, responseType, questionGroup, questionParentId, enabled){
-			var userSession = $.cookie("ADMIN_SESSION");
-			var dataToSend = new Object();
-			dataToSend.userSession = userSession;
-			dataToSend.questionText = questionText;
-			dataToSend.responseType = responseType;
-			dataToSend.questionGroup = questionGroup;
-			
-			var jsonData = JSON.stringify(dataToSend);
-			$.ajax({
-				type:"POST",
-				url:$.cookie("SERVER_HOST")+"json/addGroup",
-				data: jsonData,
-				contentType: "application/json; charset=utf-8",
-				dataType: "json",
-				success: function(data){
-					var errorCode = data.errorData.errorCode;
-					if(errorCode!=200){
-						alert(data.errorData.errorDescription);
+		$(window).bind('resize',function(){
+			var width = $(window).width();
+			if(width==null || width <1){
+				width = $(window).width();
+			}
+			width = width-20;
+			if(width > 200){
+				$("#grid").setGridWidth(width);
+			}
+		}
+		).trigger('resize');
 
-						return;
-					}else
-						{
-							$('#grid').trigger( 'reloadGrid' );
-						}
-					/*getNextPage();*/
-				},
-				failure: function(errMsg){alert(errMsg);}
-			});
-		};
+		
 		
 </script>
 </head>
 <body>
-	<div id="dialog-form" title="Создать новый вопрос">
+
+	<div id="dialog-form" title="Создать новый ответ">
 		<p class="validateTips">Необходимо ввести все поля</p>
 		<form>
 			<fieldset>
-				<label for="text_question">Текст вопроса</label>
-				<input type="text" name="text_question" id="text_question" class="text ui-widget-content ui-corner-all" />
+				<label for="name">Текст ответа</label>
+				<input type="text" name="answerText" id="answerText" width="250" class="text ui-widget-content ui-corner-all" />
+				</br>
+				<input type="checkbox" name="option1" value="a1" checked>Участвует в опросе<br>
 				</br>
 			</fieldset>
 		</form>
 	</div>
+	
 	<div>
 		<p>Выберите группу вопросов:</p>
-		<!-- <select id="list" onchange="getListGroup()">
+		<select id="list" onchange="getListGroup()">
 	   		<option disabled>Выберите группу вопросов</option>
-	    </select>-->
+	    </select>
 		
-	<!--	<div class="jquery-selectbox jquery-custom-selectboxes-replaced" style="width: 201.16px;">
-		<div class="jquery-selectbox-moreButton"></div>
-		<div class="jquery-selectbox-list jquery-custom-selectboxes-replaced-list" style="width: 196px; height: 9em; display: none;"></div>-->
 	</div>
 	</br>
 	<table width="100%" id="positionTable">
