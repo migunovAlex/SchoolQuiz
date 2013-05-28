@@ -26,7 +26,7 @@ public class Answer {
 	@OneToMany(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY, mappedBy="answer")
 	private List<UserAnswer> userAnswers;
 	
-	@OneToMany(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY, mappedBy="answer")
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="answer")
 	private List<QuestionAnswer> questionAnswerList;
 	
 	@Column(name="ANSWER_TEXT")

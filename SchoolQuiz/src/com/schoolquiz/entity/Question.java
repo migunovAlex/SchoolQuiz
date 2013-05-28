@@ -28,7 +28,7 @@ public class Question {
 	@Column(name="ID")
 	private Long id;
 	
-	@OneToMany(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY, mappedBy="question")
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="question")
 	private List<QuestionAnswer> questionAnswerList;
 	
 	@ManyToOne(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY)
