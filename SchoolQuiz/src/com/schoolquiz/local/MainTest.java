@@ -63,6 +63,10 @@ public class MainTest {
 		
 		System.out.println("questionAnswer from DB - "+questionAnswer);
 		
+//		questionAnswer = quizDao.getQuestionAnswer(17L);
+		
+		System.out.println("questionAnswer from DB - "+questionAnswer);
+		
 		questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
 		System.out.println(questionAnswer);
 		
