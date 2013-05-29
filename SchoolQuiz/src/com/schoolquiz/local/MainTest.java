@@ -52,6 +52,12 @@ public class MainTest {
 		questionAnswer.setAnswer(answer);
 		questionAnswer.setQuestion(question);
 		questionAnswer.setRight(true);
+//		questionAnswer.setId(25L);
+		
+//		questionAnswer = quizDao.getQuestionAnswer(16L);
+		
+		System.out.println(questionAnswer);
+		
 		
 		questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
 		System.out.println(questionAnswer);

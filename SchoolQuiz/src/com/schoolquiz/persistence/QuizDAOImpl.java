@@ -403,5 +403,18 @@ public class QuizDAOImpl implements QuizDAO{
 		return questionAnswer;
 	}
 
+	@Override
+	public QuestionAnswer getQuestionAnswer(long l) {
+		QuestionAnswer result = (QuestionAnswer) currentSession().load(QuestionAnswer.class, l);
+		try{
+			Hibernate.initialize(result.getAnswer());
+			Hibernate.initialize(result.getQuestion());
+		}catch(Exception e){
+			return null;
+		}
+		
+		return result;
+	}
+
 
 }
