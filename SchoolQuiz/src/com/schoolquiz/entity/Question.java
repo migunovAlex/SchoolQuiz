@@ -28,8 +28,8 @@ public class Question {
 	@Column(name="ID")
 	private Long id;
 	
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="question")
-	private List<QuestionAnswer> questionAnswerList;
+//	@OneToMany(fetch=FetchType.LAZY, mappedBy="question")
+//	private List<QuestionAnswer> questionAnswerList;
 	
 	@ManyToOne(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="QUESTION_GROUP")
@@ -95,13 +95,13 @@ public class Question {
 		this.questionGroup = questionGroup;
 	}
 	
-	public List<QuestionAnswer> getQuestionAnswerList() {
-		return questionAnswerList;
-	}
-
-	public void setQuestionAnswerList(List<QuestionAnswer> questionAnswerList) {
-		this.questionAnswerList = questionAnswerList;
-	}
+//	public List<QuestionAnswer> getQuestionAnswerList() {
+//		return questionAnswerList;
+//	}
+//
+//	public void setQuestionAnswerList(List<QuestionAnswer> questionAnswerList) {
+//		this.questionAnswerList = questionAnswerList;
+//	}
 	
 	
 	

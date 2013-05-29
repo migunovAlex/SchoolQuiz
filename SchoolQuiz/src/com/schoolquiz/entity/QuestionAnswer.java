@@ -28,7 +28,7 @@ public class QuestionAnswer {
 	@JoinColumn(name="ANSWER_ID")
 	private Answer answer;
 	
-	@Column(name="RIGHT")
+	@Column(name="RIGHT_ANSWER")
 	private Boolean right;
 
 	public long getId() {

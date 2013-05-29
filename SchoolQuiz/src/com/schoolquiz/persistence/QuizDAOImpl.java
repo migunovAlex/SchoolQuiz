@@ -253,6 +253,18 @@ public class QuizDAOImpl implements QuizDAO{
 		
 		List<QuestionAnswer> questionAnswerList = currentSession().createCriteria(QuestionAnswer.class).add(Restrictions.eq("question", question)).list();
 		
+		if(questionAnswerList!=null){
+			try{
+				for(QuestionAnswer questionAnswer:questionAnswerList){
+					Hibernate.initialize(questionAnswer);
+					Hibernate.initialize(questionAnswer.getAnswer());
+					Hibernate.initialize(questionAnswer.getQuestion());
+				}
+			}catch(Exception e){
+				return null;
+			}
+		}
+		
 		return questionAnswerList;
 	}
 
@@ -370,7 +382,7 @@ public class QuizDAOImpl implements QuizDAO{
 		Question resultQuestion = (Question) currentSession().load(Question.class, questionId);
 		try{
 			Hibernate.initialize(resultQuestion);
-			List<QuestionAnswer> questionAnswerList = resultQuestion.getQuestionAnswerList();
+			List<QuestionAnswer> questionAnswerList = getQuestionAnswerList(resultQuestion);
 			for(QuestionAnswer questionAnswer:questionAnswerList){
 				Hibernate.initialize(questionAnswer);
 				Hibernate.initialize(questionAnswer.getAnswer());
@@ -398,7 +410,21 @@ public class QuizDAOImpl implements QuizDAO{
 		try{
 			currentSession().delete(questionAnswer);
 		}catch(Exception e){
+			System.out.println("Exception - "+e.getMessage());
 			return null;
+		}
+		return questionAnswer;
+	}
+
+	@Override
+	public QuestionAnswer getQuestionAnswer(long l) {
+		QuestionAnswer questionAnswer = (QuestionAnswer) currentSession().load(QuestionAnswer.class,  l);
+		try{
+			Hibernate.initialize(questionAnswer);
+			Hibernate.initialize(questionAnswer.getAnswer());
+			Hibernate.initialize(questionAnswer.getQuestion());
+		}catch(Exception e){
+			return questionAnswer;
 		}
 		return questionAnswer;
 	}

@@ -173,3 +173,20 @@ http://localhost:8090/schoolQuiz/quiz/json/getAnswerSearch
 параметры:
 "userSession":"WB23J37AFHP0QGF8Q59M",
 "keyWord":"ст"
+
+
+http://localhost:8090/schoolQuiz/quiz/json/addAnswersToQuestion
+добавление списка ответов к вопросу
+параметры:
+"userSession":"WKYNPB7G8P6G6IB6Q175",
+"questionId":"1",
+"answerIds":["23","24"],
+"rightAnswers":[true, false]
+
+
+http://localhost:8090/schoolQuiz/quiz/json/removeAnswersFromQuestion
+удаление ответов из вопроса
+параметры:
+"userSession":"WKYNPB7G8P6G6IB6Q175",
+"questionId":"1",
+"answerIds":["23","24"]

@@ -53,6 +53,10 @@ public class MainTest {
 		questionAnswer.setQuestion(question);
 		questionAnswer.setRight(true);
 		
+//		questionAnswer = quizDao.getQuestionAnswer(17L);
+		
+		System.out.println("questionAnswer from DB - "+questionAnswer);
+		
 		questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
 		System.out.println(questionAnswer);
 		

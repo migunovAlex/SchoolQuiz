@@ -755,7 +755,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 		
 		for(int i=0; i<addAnswersToQuestionRequest.getAnswerIds().size();i++){
 			Long answerId = addAnswersToQuestionRequest.getAnswerIds().get(i);
-			List<QuestionAnswer> questionAnswerList = question.getQuestionAnswerList();
+			List<QuestionAnswer> questionAnswerList = quizDao.getQuestionAnswerList(question);
 			Boolean answerExists = false;
 			if(questionAnswerList==null) questionAnswerList = new ArrayList<>();
 			
@@ -785,13 +785,13 @@ public class AdminUserServiceImpl implements AdminUserService {
 				questionAnswer.setQuestion(question);
 				questionAnswer.setAnswer(answerToAdd);
 				questionAnswer.setRight(addAnswersToQuestionRequest.getRightAnswers().get(i));
-//				questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
-//				if(questionAnswer==null){
-//					response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
-//					response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
-//					return response;
-//				}
-				question.getQuestionAnswerList().add(questionAnswer);
+				questionAnswer = quizDao.addQuestionAnswer(questionAnswer);
+				if(questionAnswer==null){
+					response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+					response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+					return response;
+				}
+//				question.getQuestionAnswerList().add(questionAnswer);
 			}
 		}
 		
@@ -826,9 +826,17 @@ public class AdminUserServiceImpl implements AdminUserService {
 			return response;
 		}
 		
-		Iterator<QuestionAnswer> answerIterator = question.getQuestionAnswerList().iterator();
+		List<QuestionAnswer> answerList = quizDao.getQuestionAnswerList(question);
+		
+		if(answerList==null){
+			response.setOperationResult(false);
+			return response;
+		}
+		
+		
 		
 		for(Long deleteId: removeAnswersFromQuestionRequest.getAnswerIds()){
+			Iterator<QuestionAnswer> answerIterator = answerList.iterator();
 			while(answerIterator.hasNext()){
 				QuestionAnswer questionAnswer = answerIterator.next();
 				if(deleteId == questionAnswer.getAnswer().getId()){

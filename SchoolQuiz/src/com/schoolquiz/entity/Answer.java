@@ -26,8 +26,8 @@ public class Answer {
 	@OneToMany(cascade={CascadeType.REFRESH}, fetch=FetchType.LAZY, mappedBy="answer")
 	private List<UserAnswer> userAnswers;
 	
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="answer")
-	private List<QuestionAnswer> questionAnswerList;
+//	@OneToMany(fetch=FetchType.LAZY, mappedBy="answer")
+//	private List<QuestionAnswer> questionAnswerList;
 	
 	@Column(name="ANSWER_TEXT")
 	private String answerText;
@@ -85,6 +85,14 @@ public class Answer {
 	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
+
+//	public List<QuestionAnswer> getQuestionAnswerList() {
+//		return questionAnswerList;
+//	}
+//
+//	public void setQuestionAnswerList(List<QuestionAnswer> questionAnswerList) {
+//		this.questionAnswerList = questionAnswerList;
+//	}
 	
 	
 }
