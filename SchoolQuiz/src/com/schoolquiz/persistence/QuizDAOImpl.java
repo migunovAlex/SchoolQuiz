@@ -109,16 +109,6 @@ public class QuizDAOImpl implements QuizDAO{
 		resultQuestion = activeQuestions.get(rand.nextInt(activeQuestions.size()));
 		
 		
-//		Object result = currentSession().createCriteria(Question.class).setProjection(Projections.rowCount()).uniqueResult();
-//		Integer count = Integer.parseInt(result.toString());
-//		System.out.println("Number of the questions in DB - "+count);
-//		Random rand = new Random();
-//		int recordToLoad = rand.nextInt(count+1);
-//		if(recordToLoad==0) recordToLoad++;
-//		long idToLoad = Long.parseLong(recordToLoad+"");
-//		System.out.println("Load item number - "+idToLoad);
-//		Question resultQuestion = (Question) currentSession().load(Question.class, idToLoad);
-//		if(resultQuestion!=null) Hibernate.initialize(resultQuestion.getAnswerList());
 		return resultQuestion;
 	}
 
