@@ -488,20 +488,17 @@
 		).trigger('resize');
 
 		function showAnswerList(){
-			alert("Show question List");
-			
-			createQuestionInGroupsList();
+						
+			//createAnswersInQuestion();
 			
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
-			if(dataFromTheRow.id==null || dataFromTheRow.groupName == null){
-				alert("Пожалуйста, выберите группу для просмотра списка вопросов!");
+			if(dataFromTheRow.id==null || dataFromTheRow.questionText == null){
+				alert("Пожалуйста, выберите вопрос для просмотра списка ответов в нем!");
 				return;
 			}
 			
-			$("#showQuestionsForGroup_id").val(dataFromTheRow.id);
-			//alert("id Question Group: " + dataFromTheRow.id);
-			
+			//$("#showQuestionsForGroup_id").val(dataFromTheRow.id);
 			var groupId = dataFromTheRow.id;
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
@@ -516,6 +513,60 @@
 		    $("#questionsForGroupGrid").jqGrid('setGridParam', { postData: jsonData });
 		    $("#questionsForGroupGrid").trigger('reloadGrid');
 			$( "#dialog-show_questions-for-group" ).dialog( "open" );
+		}
+		
+		function createAnswersInQuestion(){
+			var groupId = $("#showQuestionsForGroup_id").val();
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.groupId = groupId;
+			//dataToSend.numberFrom = 0;
+			//dataToSend.numberOfItems = 1000;
+			var jsonData = JSON.stringify(dataToSend);
+			/*alert("jsonData: " + jsonData);*/
+			$("#questionsForGroupGrid").jqGrid({
+				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
+				datatype:'json',
+				mtype:"POST",
+				loadBeforeSend: function(xhr)
+				{
+				   xhr.setRequestHeader("Content-Type", "application/json");
+				   return xhr;
+				},
+				colNames:["ID","Текст вопроса","",""],
+				colModel:[
+				{name:'id', index:'id',width:20, editable:false, editoptions:{readonly:true, size:10},hidden:true},
+				{name:'questionText', index:'questionText', width:650, editable:true, editrules:{required:true}, editoptions:{size:10}},
+				{name:'parentId', index:'parentId', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
+				{name:'enabled', index:'enabled', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
+				
+				],
+				postData: jsonData,
+				rowNum:20,
+				//rowList:[20,40,60],
+				height:390,
+				autowidth:false,
+				rownumbers:true,
+				sortname:'id',
+				viewrecords:true,
+				sortorder:"asc",
+				caption:"Список вопросов",
+				emptyrecords:"Пустое поле",
+				loadonce:false,
+				loadcomplete:function(){},
+				jsonReader:{
+					root:"questionGroups",
+					//page:"page",
+					//total:"total",
+					//records:"records",
+					repeatitems:false,
+					//cell:"cell",
+					//id:"id"
+				}
+			});
+			/*alert("url: " + $.cookie("SERVER_HOST")+"json/getQuestionListForGroup " + " xhr: ");
+			alert("jsonData postData: " + jsonData);*/
 		}
 		
 </script>

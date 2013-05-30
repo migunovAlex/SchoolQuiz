@@ -249,15 +249,15 @@
 	function createGrid(){
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
-			var questionId = 4;
+			var keyWord = null;
 			dataToSend.userSession = userSession;
-			dataToSend.questionId = questionId;
+			dataToSend.keyWord = keyWord;
 			
 			//dataToSend.numberFrom = "0";
 			//dataToSend.numberOfItems = "20";
 			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
-				url:$.cookie("SERVER_HOST")+"json/getAnswersForQuestion",
+				url:$.cookie("SERVER_HOST")+"json/getAnswerSearch",
 				datatype:'json',
 				mtype:"POST",
 				loadBeforeSend: function(xhr)
@@ -273,7 +273,7 @@
 				{name:'right', index:'right', width:20, editable:true, edittype:"checkbox",editoptions:{value:"Yes:No"}}
 				],
 				postData: jsonData,
-				rowNum:20,
+				rowNum:200,
 				rowList:[20,40,60],
 				height:500,
 				autowidth:true,
@@ -287,7 +287,7 @@
 				loadonce:false,
 				loadcomplete:function(){},
 				jsonReader:{
-					root:"answerList",
+					root:"answers",
 					//page:"page",
 					//total:"total",
 					//records:"records",
@@ -412,13 +412,14 @@
 				// editGroup(editId.val(), editName.val(), true);
 				// $( this ).dialog( "close" );
 					alert("Running the search! ");
-/*					
+					
 				 	var userSession = $.cookie("ADMIN_SESSION");
 				 	var dataToSend = new Object();
 					dataToSend.userSession = userSession;
 					dataToSend.keyWord = keyWord;
 					
 					var jsonData = JSON.stringify(dataToSend);
+					alert("jsonData: " + jsonData);
 					$.ajax({
 						type:"POST",
 						url:$.cookie("SERVER_HOST")+"json/getAnswerSearch",
@@ -433,15 +434,14 @@
 								return;
 							}else
 								{
-									//$('#grid').trigger( 'reloadGrid' );
+									$('#grid').trigger( 'reloadGrid' );
 									
 								}
 							/*getNextPage();*/
-/*						},
+						},
 						failure: function(errMsg){alert(errMsg);}
 					});
 			//}
-*/
 		};	
 		
 		function onSearch(){
