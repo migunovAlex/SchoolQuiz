@@ -554,10 +554,7 @@
 				var loc = $.cookie("SERVER_HOST")+"pages/questionsInGroups?userSession="+userSession;
 				location=loc;
 			}
-			
-			
-		
-		
+
 	</script>
 
 </head>
