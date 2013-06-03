@@ -20,6 +20,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Список ответов</title>
 <script type="text/javascript">
+
+		var keyWordGlobal = null;
+		var dataDelete = null;
+
 		$(document).ready(function(){
 			$("li").mouseover(function(){
 				$(this).stop().animate({height:'100px'},{queue:false, duration:300, easing:'easeOutBounce'});
@@ -27,8 +31,8 @@
 			$("li").mouseout(function(){
 				$(this).stop().animate({height:'70px'},{queue:false, duration:300, easing:'easeOutBounce'});
 			});
+		
 			createGrid();
-			
 		});
 		
 		
@@ -40,7 +44,9 @@
 			editEnable = $("#edit_enable"),
 			editRight = $("#edit_right"),
 			searchText = $("search_text"),
-			allFields = $([]).add(name).add(editName).add(editId).add(editEnable).add(editRight).add(searchText);
+			deleteId = $("delete_id"),
+			deleteName = $("delete_name"), 
+			allFields = $([]).add(name).add(editName).add(editId).add(editEnable).add(editRight).add(searchText).add(deleteId).add(deleteName);
 			
 			$( "#dialog-formEdit" ).dialog({
 				 autoOpen: false,
@@ -89,7 +95,6 @@
 				 if ( bValid ) {
 					 $( "#users tbody" ).append( "<tr>" +
 					 "<td>" + name.val() + "</td>" + "</tr>" );
-					 alert("name.val(): " + name.val());
 					 createAnswer(name.val(), true);
 					 $( this ).dialog( "close" );
 				 
@@ -113,7 +118,7 @@
 				 modal: true,
 				 buttons: {
 					 "Удалить": function() {
-						 deleteAnswer(deleteId.val());
+						 deleteAnswer(dataDelete);
 						 $( this ).dialog( "close" );
 					 },
 					 "Отмена": function() {
@@ -147,16 +152,12 @@
 			
 			if ($('#edit_right').is(':checked')) {
 				rightFlag = true;
-			   alert("Checked right!");
-			   
 			} else {
 				return;
 			} 
 			
 			if ($('#edit_enable').is(':checked')) {
 				enabledFlag = true;
-				alert("Checked enable!");
-				   
 				} else {
 					return;
 				} 
@@ -211,7 +212,6 @@
 						{
 							$('#grid').trigger( 'reloadGrid' );
 						}
-					/*getNextPage();*/
 				},
 				failure: function(errMsg){alert(errMsg);}
 			});
@@ -249,12 +249,8 @@
 	function createGrid(){
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
-			var keyWord = null;
 			dataToSend.userSession = userSession;
-			dataToSend.keyWord = keyWord;
-			
-			//dataToSend.numberFrom = "0";
-			//dataToSend.numberOfItems = "20";
+			dataToSend.keyWord = keyWordGlobal;
 			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
 				url:$.cookie("SERVER_HOST")+"json/getAnswerSearch",
@@ -333,7 +329,7 @@
 			$("#grid").navButtonAdd('#pager',
 				{	caption:"Удалить",
 					buttonicon:"ui-icon-trash",
-					onClickButton: addRow,
+					onClickButton: deleteRow,
 					position: "last",
 					title:"",
 					cursor:"pointer"
@@ -345,9 +341,6 @@
 					{multipleSearch: false, sopt:['eq']}		
 				);
 			});
-			
-			/*$("#grid").jqGrid('filterToolbar',{stringResult:true, searchOnEnter:true, defaultSearch:'cn'});*/
-			
 		}
 	
 		function addRow(){
@@ -357,16 +350,12 @@
 		function editRow(){
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
-			/*alert("1 - "+dataFromTheRow.groupDescription+"; 2 - "+dataFromTheRow.id+"; 3 - "+dataFromTheRow.groupName);*/
 			if(dataFromTheRow.id==null || dataFromTheRow.answerText == null){
 				alert("Пожалуйста, выберите ответ для редактирования");
 				return;
 			}
 			$("#edit_id").val(dataFromTheRow.id);
 			$("#edit_name").val(dataFromTheRow.answerText);
-			
-			
-			
 			$( "#dialog-formEdit" ).dialog( "open" );
 			
 		}
@@ -374,12 +363,13 @@
 		function deleteRow(){
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
-			/*alert("1 - "+dataFromTheRow.groupDescription+"; 2 - "+dataFromTheRow.id+"; 3 - "+dataFromTheRow.groupName);*/
 			if(dataFromTheRow.id==null || dataFromTheRow.answerText == null){
 				alert("Пожалуйста, выберите ответ для удаления");
 				return;
 			}
 			$("#delete_id").val(dataFromTheRow.id);
+			dataDelete = $("#delete_id").val();
+			alert('dataDelete: ' + dataDelete);
 			$("#delete_name").val(dataFromTheRow.answerText);
 			$("#delete_name").attr('disabled', 'disabled');
 			$( "#dialog-confirm" ).dialog( "open" );
@@ -397,29 +387,14 @@
 		}
 		
 		function setSearch(keyWord){
-			//var inputName = $("#search_text"),
-			//description= $("#description"),
-		
-			//var bValid = true;
-			 //allFields.removeClass( "ui-state-error" );
-			// bValid = bValid && checkLength( editName, "search_text", 3, 16 );
-			// bValid = bValid && checkLength( editDescription, "edit_description", 3, 200 );
-			// if ( bValid ) {
-			//	 $( "#users tbody" ).append( "<tr>" +
-			//	 "<td>" + inputName.val() + "</td>" +
-				 //"<td>" + editDescription.val() + "</td>" +
-			//	 "</tr>" );
-				// editGroup(editId.val(), editName.val(), true);
-				// $( this ).dialog( "close" );
+
 					alert("Running the search! ");
-					
-				 	var userSession = $.cookie("ADMIN_SESSION");
+					var userSession = $.cookie("ADMIN_SESSION");
 				 	var dataToSend = new Object();
 					dataToSend.userSession = userSession;
 					dataToSend.keyWord = keyWord;
 					
 					var jsonData = JSON.stringify(dataToSend);
-					alert("jsonData: " + jsonData);
 					$.ajax({
 						type:"POST",
 						url:$.cookie("SERVER_HOST")+"json/getAnswerSearch",
@@ -434,10 +409,10 @@
 								return;
 							}else
 								{
+									$("#grid").jqGrid('setGridParam', { postData: jsonData });
 									$('#grid').trigger( 'reloadGrid' );
 									
 								}
-							/*getNextPage();*/
 						},
 						failure: function(errMsg){alert(errMsg);}
 					});
@@ -447,15 +422,13 @@
 		function onSearch(){
 			
 			var dataFromSearch = $("#search_text").val();
-
-					
-			alert("search_text " + dataFromSearch);
-			setSearch(dataFromSearch);
+			keyWordGlobal = dataFromSearch;
+			setSearch(keyWordGlobal);
 		}
 		
 		function setEnable(){
 		//	$("#edit_enable").val() = ;
-		alert("setEnable");
+		//alert("setEnable");
 		}
 		
 		function setRight(){
@@ -513,10 +486,19 @@
 			<input type="checkbox" name="edit_enable" id="edit_enable" value="true" checked>Использовать в тесте<br>
 			<br>
 			<input type="checkbox" name="edit_right" id="edit_right" value="true" checked>Правильный ответ<br>
-			
 		</fieldset>
 	</form>
 	</div>
+	<div id="dialog-confirm" title="Вы уверены что хотите удалить выбранный ответ?">
+	<form>
+		<fieldset>
+			<input type="text" name="delete_id" id="delete_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+			<label for="edit_name">Текст ответа</label>
+			<input type="text" name="delete_name" id="delete_name" class="text ui-widget-content ui-corner-all" />
+		</fieldset>
+	</form>
+	<p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>Вопрос будет удален без возможности восстановления</p>
+</div>
 	
 </body>
 </html>
