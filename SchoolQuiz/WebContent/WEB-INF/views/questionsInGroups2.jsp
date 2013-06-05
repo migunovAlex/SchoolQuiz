@@ -33,12 +33,53 @@
 				$(this).stop().animate({height:'70px'},{queue:false, duration:300, easing:'easeOutBounce'});
 			});
 			
+			validatePopupWindows();
 			loadQuestionGroups();
 			createGrid(indexIdGroup);
 		});
 		
 			
-		
+		function validatePopupWindows(){
+			$( "#dialog-form" ).dialog({
+				
+				 autoOpen: false,
+				 height: 320,
+				 width: 350,
+				 modal: true,
+				 buttons: {
+				 "Сохранить": function() {
+					var bValid = true;
+					var rightFlag = false;
+					allFields.removeClass( "ui-state-error" );
+					bValid = bValid && checkLength(questionText, "questionText", 3, 150);
+				 
+					if ( bValid ) {
+						 $( "#users tbody" ).append( "<tr>" +
+						 "<td>" + questionText.val() + "</td>" + "</tr>" );
+						 alert("Create group");
+						 
+
+						if ($('#enabledQuestion').is(':checked')) {
+							rightFlag = true;
+						} else {
+							return;
+						} 
+						
+						createQuestion(questionText.val(), rightFlag, currentGroupId);
+						 $( this ).dialog( "close" );
+				 
+				 }
+				 },
+				 "Отменить": function() {
+				 	$( this ).dialog( "close" );
+				 }
+				 },
+				 close: function() {
+				 	allFields.val( "" ).removeClass( "ui-state-error" );
+				 	$( this ).dialog( "close" );
+				 }
+			});
+		}
 		
 		
 		function checkLength( o, n, min, max ) {
@@ -128,8 +169,14 @@
 						return;
 					}else
 						{
-						 	$("#grid").jqGrid('setGridParam', { postData: jsonData });
-							$('#grid').trigger( 'reloadGrid' );
+						 	/*$("#grid").jqGrid('setGridParam', { postData: jsonData });
+							$('#grid').trigger( 'reloadGrid' );*/
+							
+						$("#grid").jqGrid('setGridParam',{ 
+					            datatype: 'local',
+					            data:data
+					        }).trigger("reloadGrid");
+							
 						}
 					/*getNextPage();*/
 				},
@@ -147,25 +194,23 @@
 			//dataToSend.numberOfItems = "20";
 			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
-				url:$.cookie("SERVER_HOST")+"json/getQuestionListForGroup",
-				datatype:'json',
-				mtype:"POST",
+				url:"",
+				datatype:'local',
 				loadBeforeSend: function(xhr)
 				{
 				   xhr.setRequestHeader("Content-Type", "application/json");
 				   return xhr;
 				},       
-				colNames:["ID", "Текст вопроса", "", ""],
+				colNames:["ID", "Текст вопроса", "Использовать в тесте"],
 				colModel:[
 					{name:'id', index:'id',width:20, editable:false, editoptions:{readonly:true, size:10},hidden:true},
-					{name:'questionText', index:'questionText', width:400, editable:true, editrules:{required:true}, editoptions:{size:10}},
-					{name:'parentId', index:'parentId', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
-					{name:'enabled', index:'enabled', width:40, editable:false, editrules:{required:true}, editoptions:{size:10},hidden:true},
+					{name:'questionText', index:'questionText', width:300, editable:true, editrules:{required:true}, editoptions:{size:10}},
+					{name:'enabled', index:'enabled', width:100, editable:false, editrules:{required:true}, editoptions:{size:10}},
 					],
 					postData: jsonData,
 					rowNum:20,
 					//rowList:[20,40,60],
-					height:500,
+					height:450,
 					autowidth:true,
 					rownumbers: true,
 					pager:'#pager',
@@ -254,7 +299,7 @@
 		
 		function addRow(){
 			alert("Add new ROW!");
-			//$( "#dialog-form" ).dialog( "open" );
+			$( "#dialog-form" ).dialog( "open" );
 		}
 		
 		function editRow(){
@@ -338,25 +383,70 @@
 </script>
 </head>
 <body>
-	<div>
-		<p>Выберите группу вопросов:</p>
-		<!-- <select id="list" class="easyui-combobox" name="list" style="width:200px;" onClick="getListGroup"></select>-->
-		<select id="list" onchange="getListGroup()">
-	   	 <option disabled>Выберите группу вопросов</option>
-	    </select>
-	</div>
-	</br>
 	<table width="100%" id="positionTable">
 		<tr>
-			<td width="100% - 200px">
+			<td width="200px">
+				<div>
+					<p>
+						<ul>
+							<table>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#">Группы вопросов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow2">
+											<p><a href="#" onClick="getQuestionsInGroups()">Список вопросов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#">Просмотр результатов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow2">
+											<p><a href="#" onclick="loadAnswerList()">Список ответов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#" onClick="closeForm()">Завершить работу</a></p>
+										</li>
+									</tr>
+								</td>
+							</table>
+						</ul>
+					</p>
+				</div>
+			</td>
+			
+			<td width="100% - 220px">
+				<div>
+					<p>Выберите группу вопросов:</p>
+					<select id="list" onchange="getListGroup()">
+						<option disabled>Выберите группу вопросов</option>
+					</select>
+		
+				</div>
 				<div id="jqgrid">
 					<table id="grid"></table>
 					<div id="pager"></div>
 				</div>
-		
 			</td>
+			
 		</tr>
-	</table>
+</table>
 	
 	<div id="dialog-form" title="Создать новый ответ">
 		<p class="validateTips">Необходимо ввести все поля</p>
@@ -365,7 +455,7 @@
 				<label for="name">Текст ответа</label>
 				<input type="text" name="answerText" id="answerText" width="250" class="text ui-widget-content ui-corner-all" />
 				</br>
-				<input type="checkbox" name="option1" value="a1" checked>enable<br>
+				<input type="checkbox" name="option1" value="a1" checked>Использовать в тесте<br>
 				</br>
 			</fieldset>
 		</form>

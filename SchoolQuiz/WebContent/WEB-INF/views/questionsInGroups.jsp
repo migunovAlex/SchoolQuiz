@@ -619,14 +619,15 @@
 					</p>
 				</div>
 			</td>
-			<div>
-				<p>Выберите группу вопросов:</p>
+			
+			<td width="100% - 200px">
+				<div>
+					<p>Выберите группу вопросов:</p>
 					<select id="list" onchange="getListGroup()">
 						<option disabled>Выберите группу вопросов</option>
 					</select>
 		
-			</div>
-			<td width="100% - 200px">
+				</div>
 				<div id="jqgrid">
 					<table id="grid"></table>
 					<div id="pager"></div>
