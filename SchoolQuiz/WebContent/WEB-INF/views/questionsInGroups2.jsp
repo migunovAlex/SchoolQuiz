@@ -33,39 +33,51 @@
 				$(this).stop().animate({height:'70px'},{queue:false, duration:300, easing:'easeOutBounce'});
 			});
 			
-			validatePopupWindows();
-			loadQuestionGroups();
 			createGrid(indexIdGroup);
+			validatePopupWindows();
+			
+			loadQuestionGroups();
+			
 		});
 		
 			
 		function validatePopupWindows(){
+			
+			var answerText = $("#answerText"),
+			allFields = $([]).add(answerText);
+			
 			$( "#dialog-form" ).dialog({
 				
 				 autoOpen: false,
 				 height: 320,
-				 width: 350,
+				 width: 500,
 				 modal: true,
 				 buttons: {
 				 "Сохранить": function() {
 					var bValid = true;
 					var rightFlag = false;
 					allFields.removeClass( "ui-state-error" );
-					bValid = bValid && checkLength(questionText, "questionText", 3, 150);
+					bValid = bValid && checkLength(answerText, "answerText", 3, 150);
 				 
 					if ( bValid ) {
 						 $( "#users tbody" ).append( "<tr>" +
-						 "<td>" + questionText.val() + "</td>" + "</tr>" );
-						 alert("Create group");
+						 "<td>" + answerText.val() + "</td>" + "</tr>" );
 						 
 
-						if ($('#enabledQuestion').is(':checked')) {
+						if ($('#useInQuiz').is(':checked')) {
 							rightFlag = true;
-						} else {
-							return;
+						} else {rightFlag = false;
 						} 
-						
-						createQuestion(questionText.val(), rightFlag, currentGroupId);
+						var e = document.getElementById("list");
+	            		var currentGroupId = e.options[e.selectedIndex].value;
+	            		var questionId = $("#question_id");
+	            		//alert(questionId.val().length==0);
+	            		if(questionId.val().length==0){
+							createQuestion(answerText.val(), rightFlag, currentGroupId);
+	            		}else
+	            			{
+	            				editQuestion(questionId.val(), answerText.val(), rightFlag, currentGroupId);
+	            			}
 						 $( this ).dialog( "close" );
 				 
 				 }
@@ -76,8 +88,91 @@
 				 },
 				 close: function() {
 				 	allFields.val( "" ).removeClass( "ui-state-error" );
+				 	$("#question_id").val("");
 				 	$( this ).dialog( "close" );
 				 }
+			});
+			
+			
+			$( "#dialog-delete-form" ).dialog({
+				 autoOpen:false,
+				 resizable: false,
+				 height:300,
+				 width:500,
+				 modal: true,
+				 buttons: {
+					 "Удалить": function() {
+						 deleteQuestion($("#delete_id").val());
+						 $( this ).dialog( "close" );
+					 },
+					 "Отмена": function() {
+						 $( this ).dialog( "close" );
+					 }
+				 }
+			});
+			
+		}
+		
+		function editQuestion(id, questionText, rightFlag, groupId){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.questionId = id;
+			dataToSend.questionText = questionText;
+			dataToSend.responseType = 1;
+			dataToSend.questionGroup = groupId;
+			dataToSend.questionParentId = null;
+			dataToSend.enabled = rightFlag;
+			
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/editQuestion",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							loadGridData(groupId);
+						}
+					/*getNextPage();*/
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		
+		function deleteQuestion(questionId){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.questionId = questionId;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/deleteQuestion",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							var e = document.getElementById("list");
+		            		var groupId = e.options[e.selectedIndex].value;
+		            		loadGridData(groupId);
+						}
+				},
+				failure: function(errMsg){alert(errMsg);}
 			});
 		}
 		
@@ -94,18 +189,7 @@
 		};
 		
 		function loadQuestionGroups(){
-		    /*$('#list').combobox({  
-		        url:null, 
-		        mode:'local',
-		        valueField:'id',  
-		        textField:'text',
-		        onSelect: function(param){
-		    		loadGridData(param.id);
-		    		indexIdGroup = param.id;
-		   	}
-		    
-		    });*/
-		    
+	
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
@@ -169,14 +253,12 @@
 						return;
 					}else
 						{
-						 	/*$("#grid").jqGrid('setGridParam', { postData: jsonData });
-							$('#grid').trigger( 'reloadGrid' );*/
-							
-						$("#grid").jqGrid('setGridParam',{ 
-					            datatype: 'local',
-					            data:data
-					        }).trigger("reloadGrid");
-							
+							$('#grid').jqGrid("clearGridData");
+							if(data.questionGroups!=null){
+								$("#grid").jqGrid('setGridParam',{ 
+							            data:data.questionGroups
+							        }).trigger("reloadGrid");
+							}
 						}
 					/*getNextPage();*/
 				},
@@ -219,8 +301,8 @@
 					sortorder:"asc",
 					caption:"Список вопросов",
 					emptyrecords:"Пустое поле",
-					loadonce:false,
-					loadcomplete:function(){},
+					loadonce:false
+					/*loadcomplete:function(){},
 					jsonReader:{
 						root:"questionGroups",
 						//page:"page",
@@ -229,7 +311,7 @@
 						repeatitems:false,
 						//cell:"cell",
 						//id:"id"
-					}
+					}*/
 			});
 			
 			$("#grid").jqGrid('navGrid','#pager',
@@ -268,17 +350,6 @@
 			);
 			
 			$("#grid").navButtonAdd('#pager',
-				{	caption:"Посмотр вопросов в группе",
-					buttonicon:"ui-icon-document",
-					onClickButton: showQuestionsList,
-					position: "last",
-					title:"",
-					cursor:"pointer"
-					
-				}
-			);
-			
-			$("#grid").navButtonAdd('#pager',
 				{	caption:"Удалить",
 					buttonicon:"ui-icon-trash",
 					onClickButton: deleteRow,
@@ -289,6 +360,18 @@
 				}
 			);
 			
+			$("#grid").navButtonAdd('#pager',
+				{	caption:"Связанные ответы",
+					buttonicon:"ui-icon-document",
+					onClickButton: showQuestionsList,
+					position: "last",
+					title:"",
+					cursor:"pointer"
+					
+				}
+			);
+			
+			
 			$("#btnFilter").click(function(){
 				$("#grid").jqGrid('searchGrid',
 					{multipleSearch: false, sopt:['eq']}		
@@ -298,26 +381,82 @@
 		}
 		
 		function addRow(){
-			alert("Add new ROW!");
+			$("#dialog-form").dialog('option', 'title', 'Создание нового вопроса');
 			$( "#dialog-form" ).dialog( "open" );
 		}
 		
 		function editRow(){
 			var s = $("#grid").jqGrid('getGridParam','selrow');
 			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
-			/*alert("1 - "+dataFromTheRow.groupDescription+"; 2 - "+dataFromTheRow.id+"; 3 - "+dataFromTheRow.groupName);*/
-			if(dataFromTheRow.id==null || dataFromTheRow.answerText == null){
+			if(dataFromTheRow.id==null || dataFromTheRow.questionText == null){
 				alert("Пожалуйста, выберите ответ для редактирования");
 				return;
 			}
-			$("#edit_id").val(dataFromTheRow.id);
-			$("#edit_name").val(dataFromTheRow.answerText);
+			getQuestionData(dataFromTheRow.id);
+		}
+		
+		function getQuestionData(questionId){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			dataToSend.questionId = questionId;
 			
-			/*$( "#dialog-formEdit" ).dialog( "open" );*/
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/getQuestion",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						alert(data.errorData.errorDescription);
+
+						return;
+					}else
+						{
+							$("#question_id").val(data.id);
+							$("#answerText").val(data.questionText);
+							if(data.enabled!=null) {
+								if(data.enabled==true){
+									$('#useInQuiz').prop('checked', true);
+								}else{
+									$('#useInQuiz').prop('checked', false);
+								}
+							}
+							
+							$("#dialog-form").dialog('option', 'title', 'Редактирование вопроса');
+							$( "#dialog-form" ).dialog( "open" );
+							
+						}
+					
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
 		}
 		
 		function deleteRow(){
+			var s = $("#grid").jqGrid('getGridParam','selrow');
+			var dataFromTheRow = $('#grid').jqGrid ('getRowData', s);
+			if(dataFromTheRow.id==null || dataFromTheRow.questionText == null){
+				alert("Пожалуйста, выберите вопрос для удаления");
+				return;
+			}
+			$("#delete_id").val(dataFromTheRow.id);
+			$("#answerTextDeleteForm").val(dataFromTheRow.questionText);
 			
+			if(dataFromTheRow.enabled!=null) {
+				if(dataFromTheRow.enabled=="true"){
+					$('#useInQuizDeleteForm').prop('checked', true);
+				}else{
+					$('#useInQuizDeleteForm').prop('checked', false);
+				}
+			}
+			$("#answerTextDeleteForm").attr('disabled', 'disabled');
+			$("#useInQuizDeleteForm").attr('disabled', 'disabled');
+			
+			$( "#dialog-delete-form" ).dialog( "open" );
 		}
 		
 		function showQuestionsList(){
@@ -352,13 +491,15 @@
 			var dataToSend = new Object();
 			dataToSend.userSession = userSession;
 			dataToSend.questionText = questionText;
-			dataToSend.responseType = responseType;
+			dataToSend.responseType = 1;
 			dataToSend.questionGroup = questionGroup;
+			dataToSend.questionParentId = null;
+			dataToSend.enabled = enabled;
 			
 			var jsonData = JSON.stringify(dataToSend);
 			$.ajax({
 				type:"POST",
-				url:$.cookie("SERVER_HOST")+"json/addGroup",
+				url:$.cookie("SERVER_HOST")+"json/addQuestion",
 				data: jsonData,
 				contentType: "application/json; charset=utf-8",
 				dataType: "json",
@@ -370,13 +511,26 @@
 						return;
 					}else
 						{
-							$('#grid').trigger( 'reloadGrid' );
+							loadGridData(questionGroup);
 						}
 					/*getNextPage();*/
 				},
 				failure: function(errMsg){alert(errMsg);}
 			});
 		};
+		
+		
+		$(window).bind('resize',function(){
+			var width = $(window).width();
+			if(width==null || width <1){
+				width = $(window).width();
+			}
+			width = width-220;
+			if(width > 200){
+				$("#grid").setGridWidth(width);
+			}
+		}
+		).trigger('resize');
 		
 	
 		
@@ -452,10 +606,25 @@
 		<p class="validateTips">Необходимо ввести все поля</p>
 		<form>
 			<fieldset>
+				<input type="text" name="question_id" id="question_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
 				<label for="name">Текст ответа</label>
-				<input type="text" name="answerText" id="answerText" width="250" class="text ui-widget-content ui-corner-all" />
+				<input type="text" name="answerText" id="answerText" width="500" class="text ui-widget-content ui-corner-all" />
 				</br>
-				<input type="checkbox" name="option1" value="a1" checked>Использовать в тесте<br>
+				<input type="checkbox" name="option1" id="useInQuiz" value="a1" checked>Использовать в тесте<br>
+				</br>
+			</fieldset>
+		</form>
+	</div>
+	
+	<div id="dialog-delete-form" title="Удалить ответ">
+		<p class="validateTips">Вы уверены что хотите удалить вопрос</p>
+		<form>
+			<fieldset>
+				<input type="text" name="delete_id" id="delete_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+				<label for="name">Текст вопроса</label>
+				<input type="text" name="answerTextDeleteForm" id="answerTextDeleteForm" width="500" class="text ui-widget-content ui-corner-all" />
+				</br>
+				<input type="checkbox" name="option1" id="useInQuizDeleteForm" value="a1">Использовать в тесте<br>
 				</br>
 			</fieldset>
 		</form>
