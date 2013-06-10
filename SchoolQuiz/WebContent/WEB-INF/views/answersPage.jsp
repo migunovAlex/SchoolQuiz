@@ -261,12 +261,11 @@
 				   xhr.setRequestHeader("Content-Type", "application/json");
 				   return xhr;
 				},        
-				colNames:["ID", "Список ответов", "Enabled","Right"],
+				colNames:["ID", "Список ответов", "Enabled"],
 				colModel:[
 				{name:'id', index:'id',width:60, editable:false, editoptions:{readonly:true, size:10},hidden:true},
 				{name:'answerText', index:'answerText', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
-				{name:'enabled', index:'enabled', width:20, editable:true, edittype:"checkbox",editoptions:{value:"Yes:No"}},
-				{name:'right', index:'right', width:20, editable:true, edittype:"checkbox",editoptions:{value:"Yes:No"}}
+				{name:'enabled', index:'enabled', width:20, editable:true, edittype:"checkbox",editoptions:{value:"Yes:No"}}
 				],
 				postData: jsonData,
 				rowNum:200,
