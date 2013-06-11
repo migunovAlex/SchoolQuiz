@@ -137,7 +137,9 @@
 				 modal: true,
 				 buttons: {
 					 "Добавить": function() {
+						
 						 onAddAnswers();
+						 $('#answGrid').jqGrid("clearGridData");
 						 $( this ).dialog( "close" );
 					 },
 					 "Закрыть": function() {
@@ -837,7 +839,51 @@
 		}
 		).trigger('resize');
 		
-	
+		function closeForm(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/finishUserSession",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						/*alert(data.errorData.errorDescription);*/
+						$.cookie("ADMIN_SESSION", null);
+						return;
+					}
+					getLoginPage();
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		function getLoginPage(){
+			location=$.cookie("SERVER_HOST")+"pages/loginForm";
+		}
+		
+		function loadAnswerList(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/answersPage?userSession="+userSession;
+			location=loc;
+
+		}
+		
+		function getQuestionsInGroups(){
+				var userSession = $.cookie("ADMIN_SESSION");
+				var loc = $.cookie("SERVER_HOST")+"pages/questionsInGroups?userSession="+userSession;
+				location=loc;
+			}
+		
+		function getMain(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/main?userSession="+userSession;
+			location=loc;
+		}
 		
 </script>
 </head>
@@ -852,7 +898,7 @@
 								<td>
 									<tr>
 										<li class="yellow">
-											<p><a href="#">Группы вопросов</a></p>
+											<p><a href="#" onClick="getMain()">Группы вопросов</a></p>
 										</li>
 									</tr>
 								</td>

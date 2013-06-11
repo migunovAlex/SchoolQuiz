@@ -42,11 +42,10 @@
 			editName = $("#edit_name"),
 			editId = $("#edit_id"),
 			editEnable = $("#edit_enable"),
-			editRight = $("#edit_right"),
 			searchText = $("search_text"),
 			deleteId = $("delete_id"),
 			deleteName = $("delete_name"), 
-			allFields = $([]).add(name).add(editName).add(editId).add(editEnable).add(editRight).add(searchText).add(deleteId).add(deleteName);
+			allFields = $([]).add(name).add(editName).add(editId).add(editEnable).add(searchText).add(deleteId).add(deleteName);
 			
 			$( "#dialog-formEdit" ).dialog({
 				 autoOpen: false,
@@ -93,9 +92,14 @@
 				 allFields.removeClass( "ui-state-error" );
 				 bValid = bValid && checkLength(name, "name", 2, 150);
 				 if ( bValid ) {
+					 var rightFlag;
+					 if ($('#useInQuiz').is(':checked')) {
+							rightFlag = true;
+						} else {rightFlag = false;
+						} 
 					 $( "#users tbody" ).append( "<tr>" +
 					 "<td>" + name.val() + "</td>" + "</tr>" );
-					 createAnswer(name.val(), true);
+					 createAnswer(name.val(), rightFlag);
 					 $( this ).dialog( "close" );
 				 
 				 }
@@ -113,7 +117,7 @@
 			$( "#dialog-confirm" ).dialog({
 				 autoOpen:false,
 				 resizable: false,
-				 height:300,
+				 height:330,
 				 width:350,
 				 modal: true,
 				 buttons: {
@@ -147,19 +151,13 @@
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
 			
-			var rightFlag = false;
 			var enabledFlag = false;
 			
-			if ($('#edit_right').is(':checked')) {
-				rightFlag = true;
-			} else {
-				return;
-			} 
 			
 			if ($('#edit_enable').is(':checked')) {
 				enabledFlag = true;
 				} else {
-					return;
+					enabledFlag = false;
 				} 
 			
 			
@@ -182,7 +180,8 @@
 						return;
 					}else
 						{
-							$('#grid').trigger( 'reloadGrid' );
+							alert("Вопрос изменен. Вы можете теперь найти его в поиске");
+							onSearch();
 						}
 					/*getNextPage();*/
 				},
@@ -210,7 +209,8 @@
 						return;
 					}else
 						{
-							$('#grid').trigger( 'reloadGrid' );
+							alert("Вопрос удален");
+							onSearch();
 						}
 				},
 				failure: function(errMsg){alert(errMsg);}
@@ -238,7 +238,8 @@
 						return;
 					}else
 						{
-							$('#grid').trigger( 'reloadGrid' );
+							alert("Вопрос сохранен. Вы можете теперь найти его в поиске");
+							onSearch();
 						}
 					/*getNextPage();*/
 				},
@@ -247,30 +248,16 @@
 		}
 
 	function createGrid(){
-			var userSession = $.cookie("ADMIN_SESSION");
-			var dataToSend = new Object();
-			dataToSend.userSession = userSession;
-			dataToSend.keyWord = keyWordGlobal;
-			var jsonData = JSON.stringify(dataToSend);
 			$("#grid").jqGrid({
-				url:$.cookie("SERVER_HOST")+"json/getAnswerSearch",
-				datatype:'json',
-				mtype:"POST",
-				loadBeforeSend: function(xhr)
-				{
-				   xhr.setRequestHeader("Content-Type", "application/json");
-				   return xhr;
-				},        
+				url:"",
+				datatype:'local',
 				colNames:["ID", "Список ответов", "Enabled"],
 				colModel:[
 				{name:'id', index:'id',width:60, editable:false, editoptions:{readonly:true, size:10},hidden:true},
 				{name:'answerText', index:'answerText', width:100, editable:true, editrules:{required:true}, editoptions:{size:10}},
 				{name:'enabled', index:'enabled', width:20, editable:true, edittype:"checkbox",editoptions:{value:"Yes:No"}}
 				],
-				postData: jsonData,
-				rowNum:200,
-				rowList:[20,40,60],
-				height:500,
+				height:430,
 				autowidth:true,
 				rownumbers: true,
 				pager:'#pager',
@@ -280,16 +267,6 @@
 				caption:"Список ответов",
 				emptyrecords:"Пустое поле",
 				loadonce:false,
-				loadcomplete:function(){},
-				jsonReader:{
-					root:"answers",
-					//page:"page",
-					//total:"total",
-					//records:"records",
-					repeatitems:false,
-					//cell:"cell",
-					//id:"id"
-				}
 			});
 			
 			$("#grid").jqGrid('navGrid','#pager',
@@ -368,7 +345,6 @@
 			}
 			$("#delete_id").val(dataFromTheRow.id);
 			dataDelete = $("#delete_id").val();
-			alert('dataDelete: ' + dataDelete);
 			$("#delete_name").val(dataFromTheRow.answerText);
 			$("#delete_name").attr('disabled', 'disabled');
 			$( "#dialog-confirm" ).dialog( "open" );
@@ -386,8 +362,6 @@
 		}
 		
 		function setSearch(keyWord){
-
-					alert("Running the search! ");
 					var userSession = $.cookie("ADMIN_SESSION");
 				 	var dataToSend = new Object();
 					dataToSend.userSession = userSession;
@@ -408,8 +382,12 @@
 								return;
 							}else
 								{
-									$("#grid").jqGrid('setGridParam', { postData: jsonData });
-									$('#grid').trigger( 'reloadGrid' );
+									$('#grid').jqGrid("clearGridData");
+									if(data.answers!=null){
+										$("#grid").jqGrid('setGridParam',{ 
+									            data:data.answers
+									        }).trigger("reloadGrid");
+									}
 									
 								}
 						},
@@ -425,31 +403,111 @@
 			setSearch(keyWordGlobal);
 		}
 		
-		function setEnable(){
-		//	$("#edit_enable").val() = ;
-		//alert("setEnable");
+		function closeForm(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var dataToSend = new Object();
+			dataToSend.userSession = userSession;
+			var jsonData = JSON.stringify(dataToSend);
+			$.ajax({
+				type:"POST",
+				url:$.cookie("SERVER_HOST")+"json/finishUserSession",
+				data: jsonData,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data){
+					var errorCode = data.errorData.errorCode;
+					if(errorCode!=200){
+						/*alert(data.errorData.errorDescription);*/
+						$.cookie("ADMIN_SESSION", null);
+						return;
+					}
+					getLoginPage();
+				},
+				failure: function(errMsg){alert(errMsg);}
+			});
+		}
+		function getLoginPage(){
+			location=$.cookie("SERVER_HOST")+"pages/loginForm";
 		}
 		
-		function setRight(){
-		//	$("#edit_right").val(dataFromTheRow.right);
-			alert("setRight");
+		function loadAnswerList(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/answersPage?userSession="+userSession;
+			location=loc;
+
+		}
+		
+		function getQuestionsInGroups(){
+				var userSession = $.cookie("ADMIN_SESSION");
+				var loc = $.cookie("SERVER_HOST")+"pages/questionsInGroups?userSession="+userSession;
+				location=loc;
+			}
+		
+		function getMain(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/main?userSession="+userSession;
+			location=loc;
 		}
 </script>
 
 </head>
 <body>
-	<div>
-		<p>Введите ответ, который хотите найти: </p>
-		<input type="text" size="40" name="search_text" id="search_text">
-		<br>
-		<form>
-  			<input type="button" name="search_button" id="search_button" onClick="onSearch()" value="ПОИСК"/>
-		</form>
-	</div>
-	<br>
 	<table width="100%" id="positionTable">
-
+		<tr>
+			<td width="200px">
+				<div>
+					<p>
+						<ul>
+							<table>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#" onClick="getMain()">Группы вопросов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow2">
+											<p><a href="#" onClick="getQuestionsInGroups()">Список вопросов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#">Просмотр результатов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow2">
+											<p><a href="#" onclick="loadAnswerList()">Список ответов</a></p>
+										</li>
+									</tr>
+								</td>
+								<td>
+									<tr>
+										<li class="yellow">
+											<p><a href="#" onClick="closeForm()">Завершить работу</a></p>
+										</li>
+									</tr>
+								</td>
+							</table>
+						</ul>
+					</p>
+				</div>
+			</td>
 			<td width="100% - 200px">
+				<div>
+					<p>Введите ответ, который хотите найти: </p>
+					<input type="text" size="40" name="search_text" id="search_text">
+					<br>
+					<form>
+			  			<input type="button" name="search_button" id="search_button" onClick="onSearch()" value="ПОИСК"/>
+					</form>
+				</div>
 				<div id="jqgrid">
 					<table id="grid"></table>
 					<div id="pager"></div>
@@ -466,8 +524,7 @@
 			<input type="text" name="name" id="name" width="250" class="text ui-widget-content ui-corner-all" />
 			</br>
 			<input type="checkbox" name="useInTest" value="true" checked>Использовать в тесте<br>
-			</br>
-			<input type="checkbox" name="rightAnswer" value="false" checked>Правильный ответ<br>
+
 		</fieldset>
 	</form>
 	</div>
@@ -483,8 +540,6 @@
 			<input type="text" name="edit_name" id="edit_name" class="text ui-widget-content ui-corner-all" />
 			<br>
 			<input type="checkbox" name="edit_enable" id="edit_enable" value="true" checked>Использовать в тесте<br>
-			<br>
-			<input type="checkbox" name="edit_right" id="edit_right" value="true" checked>Правильный ответ<br>
 		</fieldset>
 	</form>
 	</div>

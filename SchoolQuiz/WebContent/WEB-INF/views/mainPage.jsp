@@ -501,6 +501,20 @@
 			
 		}
 		
+		
+		$(window).bind('resize',function(){
+			var width = $(window).width()-200;
+			if(width==null || width <1){
+				width = $(window).width() - 200;
+			}
+			width = width-20;
+			if(width > 200){
+				$("#grid").setGridWidth(width);
+			}
+		}
+		).trigger('resize');
+		
+		
 		function closeForm(){
 			var userSession = $.cookie("ADMIN_SESSION");
 			var dataToSend = new Object();
@@ -508,7 +522,7 @@
 			var jsonData = JSON.stringify(dataToSend);
 			$.ajax({
 				type:"POST",
-				url:$.cookie("SERVER_HOST")+"finishUserSession",
+				url:$.cookie("SERVER_HOST")+"json/finishUserSession",
 				data: jsonData,
 				contentType: "application/json; charset=utf-8",
 				dataType: "json",
@@ -524,20 +538,6 @@
 				failure: function(errMsg){alert(errMsg);}
 			});
 		}
-		
-		$(window).bind('resize',function(){
-			var width = $(window).width()-200;
-			if(width==null || width <1){
-				width = $(window).width() - 200;
-			}
-			width = width-20;
-			if(width > 200){
-				$("#grid").setGridWidth(width);
-			}
-		}
-		).trigger('resize');
-		
-		
 		function getLoginPage(){
 			location=$.cookie("SERVER_HOST")+"pages/loginForm";
 		}
@@ -554,6 +554,12 @@
 				var loc = $.cookie("SERVER_HOST")+"pages/questionsInGroups?userSession="+userSession;
 				location=loc;
 			}
+		
+		function getMain(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/main?userSession="+userSession;
+			location=loc;
+		}
 
 	</script>
 
@@ -569,7 +575,7 @@
 								<td>
 									<tr>
 										<li class="yellow">
-											<p><a href="#">Группы вопросов</a></p>
+											<p><a href="#" onClick="getMain()">Группы вопросов</a></p>
 										</li>
 									</tr>
 								</td>
