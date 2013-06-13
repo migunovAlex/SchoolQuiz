@@ -30,6 +30,7 @@ import com.schoolquiz.entity.admin.request.DeleteAnswerRequest;
 import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
 import com.schoolquiz.entity.admin.request.DeleteQuestionRequest;
 import com.schoolquiz.entity.admin.request.EditAnswerRequest;
+import com.schoolquiz.entity.admin.request.EditAnswersFromQuestionRequest;
 import com.schoolquiz.entity.admin.request.EditGroupRequest;
 import com.schoolquiz.entity.admin.request.EditQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetAnswerRequest;
@@ -48,6 +49,7 @@ import com.schoolquiz.entity.admin.response.AnswerItem;
 import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
 import com.schoolquiz.entity.admin.response.DictItem;
 import com.schoolquiz.entity.admin.response.EditAnswerResponse;
+import com.schoolquiz.entity.admin.response.EditAnswersFromQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerSearchResponse;
 import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
@@ -853,6 +855,50 @@ public class AdminUserServiceImpl implements AdminUserService {
 		
 		response.setOperationResult(true);
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		return response;
+	}
+
+	@Override
+	public EditAnswersFromQuestionResponse editAnswerFromQuestion(EditAnswersFromQuestionRequest editAnswersFromQuestionRequest) {
+		
+		EditAnswersFromQuestionResponse response = new EditAnswersFromQuestionResponse();
+		response.setOperationResult(false);
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(editAnswersFromQuestionRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			response.setErrorData(checkAdminSessionRes.getErrorData());
+			return response;
+		}
+		
+		if(editAnswersFromQuestionRequest.getQuestionId()==null|| editAnswersFromQuestionRequest.getAnswerId()==null){
+			response.getErrorData().setErrorCode(ErrorData.WRONG_PARAMS);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_WRONG_PARAMS);
+			return response;
+		}
+		
+		Question question = quizDao.getQuestion(editAnswersFromQuestionRequest.getQuestionId());
+		Answer answer = quizDao.getAnswer(editAnswersFromQuestionRequest.getAnswerId());
+		QuestionAnswer questionAnswerToEdit = quizDao.getQuestionAnswer(question, answer);
+				
+		if(question==null || answer==null||questionAnswerToEdit==null){
+			response.getErrorData().setErrorCode(ErrorData.NO_SUCH_ANSWER_FOR_QUESTION);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_NO_SUCH_ANSWER_FOR_QUESTION);
+			return response;
+		}
+		
+		questionAnswerToEdit.setRight(editAnswersFromQuestionRequest.getRightAnswer());
+		
+		questionAnswerToEdit = quizDao.updateQuestionAnswer(questionAnswerToEdit);
+		
+		if(questionAnswerToEdit==null){
+			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return response;
+		}
+		
+		response.setOperationResult(true);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+	
+	
 		return response;
 	}
 

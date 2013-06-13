@@ -128,6 +128,66 @@
 				 }
 			});
 			
+			$( "#answerForQuestionEditForm" ).dialog({
+				 autoOpen:false,
+				 resizable: false,
+				 height:350,
+				 width:650,
+				 modal: true,
+				 buttons: {
+					 "Сохранить": function() {
+							
+						 var af_questionId = $("#af_question_id").val();
+						 var af_answerId = $("#af_answer_id").val();
+						 var rightAnswer = false;
+						 if ($('#af_rightInQuestion').is(':checked')) {
+							 rightAnswer = true;
+						 }
+						 
+						 var userSession = $.cookie("ADMIN_SESSION");
+							var dataToSend = new Object();
+							dataToSend.userSession = userSession;
+							dataToSend.questionId = af_questionId;
+							dataToSend.answerId = af_answerId;
+							dataToSend.rightAnswer = rightAnswer;
+							
+							var jsonDataToSend = JSON.stringify(dataToSend);
+							$.ajax({
+								type:"POST",
+								url:$.cookie("SERVER_HOST")+"json/editAnswersFromQuestion",
+								data: jsonDataToSend,
+								contentType: "application/json; charset=utf-8",
+								dataType: "json",
+								success: function(data){
+									var errorCode = data.errorData.errorCode;
+									if(errorCode!=200){
+										alert(data.errorData.errorDescription);
+
+										return;
+									}else
+										{
+										
+											if(data.operationResult==true){
+												loadLinkedAnswers(af_questionId, false);
+												$( "#answerForQuestionEditForm" ).dialog( "close" );
+											}
+											
+										}
+									
+								},
+								failure: function(errMsg){alert(errMsg);}
+							});
+						 
+						 clearEditAnswersForm();
+						 $( this ).dialog( "close" );
+					 },
+					 "Закрыть": function() {
+						 clearEditAnswersForm();
+						 $( this ).dialog( "close" );
+					 }
+				 }
+			});
+			
 			
 			$( "#answers-form" ).dialog({
 				 autoOpen:false,
@@ -137,7 +197,6 @@
 				 modal: true,
 				 buttons: {
 					 "Добавить": function() {
-						
 						 onAddAnswers();
 						 $('#answGrid').jqGrid("clearGridData");
 						 $( this ).dialog( "close" );
@@ -147,6 +206,15 @@
 					 }
 				 }
 			});
+			
+		}
+		
+		function clearEditAnswersForm(){
+			$("#af_answerText").val();
+			$("#af_question_id").val();
+			$("#af_answer_id").val();
+			$("#af_questionText").val();
+			$('#af_rightInQuestion').prop('checked', false);
 			
 		}
 		
@@ -413,6 +481,7 @@
 					rownumbers: true,
 					sortname:'id',
 					viewrecords:true,
+					pgtext: null,  
 					sortorder:"asc",
 					multiselect:true,
 					caption:"Список ответов",
@@ -436,6 +505,7 @@
 					height:275,
 					width:680,
 					rownumbers: true,
+					pgtext: null,
 					pager:'#answersPager',
 					sortname:'id',
 					viewrecords:true,
@@ -480,7 +550,63 @@
 							
 						}
 					);
+				$("#answersGrid").navButtonAdd('#answersPager',
+						{	caption:"Редактировать",
+							buttonicon:"ui-icon-pen",
+							onClickButton: editAnswerInQueston,
+							position: "last",
+							title:"",
+							cursor:"pointer"
+							
+						}
+					);
 				
+		}
+		
+		function editAnswerInQueston(){
+			s = $("#answersGrid").jqGrid('getGridParam','selarrrow');
+			if(s.length==0){
+				alert("Выберите ответ который необходимо редактировать");
+				return;
+			}
+			if(s.length==0){
+				alert("Выберите ответ для редактирования");
+				return;
+			}
+			if(s.length>1){
+				alert("Выберите только один ответ для редактирования");
+				return;
+			}
+			
+			var answerRow = $("#answersGrid").jqGrid('getGridParam','selrow');
+			var answerData = $('#answersGrid').jqGrid ('getRowData', answerRow);
+						 
+			 var s1 = $("#grid").jqGrid('getGridParam','selrow');
+				var dataFromTheRow = $('#grid').jqGrid ('getRowData', s1);
+				if(dataFromTheRow.id==null || dataFromTheRow.questionText == null){
+					alert("Пожалуйста, выберите ответ для редактирования");
+					return;
+				}
+			var questionId = dataFromTheRow.id;
+			var questionText = dataFromTheRow.questionText;
+			var answerId = answerData.id;
+			var answerText = answerData.answerText;
+			var answerRight = answerData.right;
+			
+			$("#af_question_id").val(questionId);
+			$("#af_questionText").val(questionText);
+			$("#af_answer_id").val(answerId);
+			$("#af_answerText").val(answerText);
+				if(answerRight=="true"){
+					$('#af_rightInQuestion').prop('checked', true);
+				}else{
+					$('#af_rightInQuestion').prop('checked', false);
+				}
+			
+			$("#af_questionText").attr('disabled', 'disabled');
+			$("#af_answerText").attr('disabled', 'disabled');
+			
+			$( "#answerForQuestionEditForm" ).dialog( "open" );
 		}
 		
 		
@@ -567,6 +693,7 @@
 					height:450,
 					autowidth:true,
 					rownumbers: true,
+					pgtext: null,
 					pager:'#pager',
 					sortname:'id',
 					viewrecords:true,
@@ -967,6 +1094,22 @@
 		</form>
 	</div>
 	
+	<div id="answerForQuestionEditForm" title="Редактирование ответа для вопроса">
+		<form>
+			<fieldset>
+				<input type="text" name="af_question_id" id="af_question_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+				<input type="text" name="af_answer_id" id="af_answer_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+				<label for="name">Текст вопроса</label>
+				<input type="text" name="af_questionText" id="af_questionText" width="500" size="60" class="text ui-widget-content ui-corner-all" />
+				<label for="name">Текст ответа</label>
+				<input type="text" name="af_answerText" id="af_answerText" width="500" size="60" class="text ui-widget-content ui-corner-all" />
+				</br>
+				<input type="checkbox" name="af_rightInQuestion" id="af_rightInQuestion" value="a1" checked>Правильный ответ<br>
+				</br>
+			</fieldset>
+		</form>
+	</div>
+	
 	<div id="linkedAnswers-form" title="Связанные ответы">
 		<div id="jqAnswersGrid">
 			<table id="answersGrid"></table>
@@ -990,12 +1133,12 @@
 		<p class="validateTips">Вы уверены что хотите удалить вопрос</p>
 		<form>
 			<fieldset>
-				<input type="text" name="delete_id" id="delete_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
-				<label for="name">Текст вопроса</label>
-				<input type="text" name="answerTextDeleteForm" id="answerTextDeleteForm" width="500" class="text ui-widget-content ui-corner-all" />
-				</br>
-				<input type="checkbox" name="option1" id="useInQuizDeleteForm" value="a1">Использовать в тесте<br>
-				</br>
+				<table>
+					<input type="text" name="delete_id" id="delete_id" style="display: none;" class="text ui-widget-content ui-corner-all" />
+					<label for="name">Текст вопроса</label>
+					<input type="text" name="answerTextDeleteForm" id="answerTextDeleteForm" width="500" class="text ui-widget-content ui-corner-all" />
+					<input type="checkbox" name="option1" id="useInQuizDeleteForm" value="a1">Использовать в тесте</input>
+				</table>
 			</fieldset>
 		</form>
 	</div>

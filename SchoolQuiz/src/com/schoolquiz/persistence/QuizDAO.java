@@ -74,6 +74,8 @@ public interface QuizDAO {
 	public QuestionAnswer deleteQuestionAnswer(QuestionAnswer questionAnswer);
 
 	public QuestionAnswer getQuestionAnswer(long l);
+
+	public QuestionAnswer updateQuestionAnswer(QuestionAnswer questionAnswerToEdit);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

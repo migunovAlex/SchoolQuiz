@@ -419,5 +419,16 @@ public class QuizDAOImpl implements QuizDAO{
 		return questionAnswer;
 	}
 
+	@Override
+	public QuestionAnswer updateQuestionAnswer(QuestionAnswer questionAnswerToEdit) {
+		try{
+			currentSession().update(questionAnswerToEdit);
+		}catch(HibernateException ex){
+			return null;
+		}
+		
+		return questionAnswerToEdit;
+	}
+
 
 }

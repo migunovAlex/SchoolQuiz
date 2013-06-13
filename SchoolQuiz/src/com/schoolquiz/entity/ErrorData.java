@@ -13,6 +13,7 @@ public class ErrorData {
 	public static int NO_SUCH_QUESTION_GROUP = 420;
 	public static int NO_SUCH_QUESTION = 420;
 	public static int NO_SUCH_ANSWER = 421;
+	public static int NO_SUCH_ANSWER_FOR_QUESTION = 422;
 	
 	public static String DESCRIPTION_OK = "OK";
 	public static String DESCRIPTION_NOT_ENOUGH_PARAMS = "Not enough params";
@@ -25,6 +26,7 @@ public class ErrorData {
 	public static String DESCRIPTION_NO_SUCH_QUESTION_GROUP = "There is no group with such id";
 	public static String DESCRIPTION_NO_SUCH_QUESTION = "There is no question with such id";
 	public static String DESCRIPTION_NO_SUCH_ANSWER = "There is no answer with such id";
+	public static String DESCRIPTION_NO_SUCH_ANSWER_FOR_QUESTION = "There is no such answer for such question";
 	
 	private int errorCode;
 	private String errorDescription;

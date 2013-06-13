@@ -14,6 +14,7 @@ import com.schoolquiz.entity.admin.request.DeleteAnswerRequest;
 import com.schoolquiz.entity.admin.request.DeleteGroupRequest;
 import com.schoolquiz.entity.admin.request.DeleteQuestionRequest;
 import com.schoolquiz.entity.admin.request.EditAnswerRequest;
+import com.schoolquiz.entity.admin.request.EditAnswersFromQuestionRequest;
 import com.schoolquiz.entity.admin.request.EditGroupRequest;
 import com.schoolquiz.entity.admin.request.EditQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetAnswerRequest;
@@ -28,6 +29,7 @@ import com.schoolquiz.entity.admin.response.AddAnswerResponse;
 import com.schoolquiz.entity.admin.response.AddAnswersToQuestionResponse;
 import com.schoolquiz.entity.admin.response.DeleteAnswerResponse;
 import com.schoolquiz.entity.admin.response.EditAnswerResponse;
+import com.schoolquiz.entity.admin.response.EditAnswersFromQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerResponse;
 import com.schoolquiz.entity.admin.response.GetAnswerSearchResponse;
 import com.schoolquiz.entity.admin.response.GetAnswersForQuestionResponse;
@@ -84,6 +86,8 @@ public interface AdminUserService {
 	public AddAnswersToQuestionResponse addAnswersToQuestion(AddAnswersToQuestionRequest addAnswersToQuestionRequest);
 
 	public RemoveAnswersFromQuestionResponse removeAnswersFromQuestion(RemoveAnswersFromQuestionRequest removeAnswersFromQuestionRequest);
+
+	public EditAnswersFromQuestionResponse editAnswerFromQuestion(EditAnswersFromQuestionRequest editAnswersFromQuestionRequest);
 
 
 }
