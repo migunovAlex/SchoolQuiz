@@ -1,5 +1,7 @@
 package com.schoolquiz.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -13,6 +15,8 @@ import com.schoolquiz.entity.ErrorData;
 import com.schoolquiz.entity.Question;
 import com.schoolquiz.entity.QuestionAnswer;
 import com.schoolquiz.entity.QuestionGroup;
+import com.schoolquiz.entity.UserAnswer;
+import com.schoolquiz.entity.UserResult;
 import com.schoolquiz.entity.admin.AdminUser;
 import com.schoolquiz.entity.admin.AdminUserSession;
 import com.schoolquiz.entity.admin.CheckSessionSummary;
@@ -40,6 +44,7 @@ import com.schoolquiz.entity.admin.request.GetGroupsDictRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
+import com.schoolquiz.entity.admin.request.GetUserResultsRequest;
 import com.schoolquiz.entity.admin.request.RemoveAnswersFromQuestionRequest;
 import com.schoolquiz.entity.admin.request.UserSession;
 import com.schoolquiz.entity.admin.response.AddAnswerResponse;
@@ -57,8 +62,10 @@ import com.schoolquiz.entity.admin.response.GetGroupsDictResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
+import com.schoolquiz.entity.admin.response.GetUserResultsResponse;
 import com.schoolquiz.entity.admin.response.QuestionForAdmin;
 import com.schoolquiz.entity.admin.response.RemoveAnswersFromQuestionResponse;
+import com.schoolquiz.entity.admin.response.UserResultsEntity;
 import com.schoolquiz.entity.controllerparams.QuestionForGroup;
 import com.schoolquiz.persistence.AdminDAO;
 import com.schoolquiz.persistence.QuizDAO;
@@ -899,6 +906,72 @@ public class AdminUserServiceImpl implements AdminUserService {
 		updateSessionActivity(checkAdminSessionRes.getUserSession());
 	
 	
+		return response;
+	}
+
+	@Override
+	public GetUserResultsResponse getUsersResults(GetUserResultsRequest getUserResultsRequest) {
+		GetUserResultsResponse response = new GetUserResultsResponse();
+		CheckSessionSummary checkAdminSessionRes = checkAdminSession(getUserResultsRequest.getUserSession());
+		if(checkAdminSessionRes.getErrorData().getErrorCode()!=ErrorData.CODE_OK){
+			response.setErrorData(checkAdminSessionRes.getErrorData());
+			return response;
+		}
+		
+		if(getUserResultsRequest.getResultDate()==null){
+			response.getErrorData().setErrorCode(ErrorData.WRONG_PARAMS);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_WRONG_PARAMS);
+			return response;
+		}
+		
+		Date selectedDate = null;
+		try {
+			selectedDate = new SimpleDateFormat("MM/dd/yyyy").parse(getUserResultsRequest.getResultDate());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(selectedDate==null){
+			response.getErrorData().setErrorCode(ErrorData.SOMETHING_WRONG);
+			response.getErrorData().setErrorDescription(ErrorData.DESCRIPTION_SOMETHING_WRONG);
+			return response;
+		}
+		
+		List<UserResult> userResults = quizDao.getUserResultsByDate(selectedDate );
+		
+		if(userResults==null || userResults.size()==0){
+			
+			return response;
+		}
+		List<UserResultsEntity> userResultList = new ArrayList<>();
+		
+		for(UserResult userResult:userResults){
+			List<UserAnswer> userAnswersByUserResult = quizDao.getUserAnswersByUserResult(userResult);
+			for(UserAnswer userAnswer:userAnswersByUserResult){
+				UserResultsEntity userEntity = new UserResultsEntity();
+				Date dateOfAnswer = new Date(userResult.getStartTime());
+				userEntity.setDateOfAnswer(new SimpleDateFormat("MM/dd/yyyy").format(dateOfAnswer));
+				userEntity.setTimeOfAnswer(new SimpleDateFormat("HH:mm").format(dateOfAnswer));
+				userEntity.setComputerIP(userResult.getCompIp());
+				userEntity.setAnswerer(userResult.getUserName());
+				userEntity.setQuestionAnswer(userAnswer.getQuestion().getQuestionText());
+				userEntity.setUserAnswer(userAnswer.getAnswer().getAnswerText());
+				Answer answer = userAnswer.getAnswer();
+				Question question = userAnswer.getQuestion();
+				if(answer!=null&&question!=null){
+					QuestionAnswer questionAnswer = quizDao.getQuestionAnswer(question, answer);
+					if(questionAnswer!=null){
+						Boolean right = questionAnswer.isRight();
+						userEntity.setRight(right);
+					}
+				}
+				userResultList.add(userEntity);
+			}
+		}
+		
+		response.setUserResults(userResultList);
+		updateSessionActivity(checkAdminSessionRes.getUserSession());
+		
 		return response;
 	}
 

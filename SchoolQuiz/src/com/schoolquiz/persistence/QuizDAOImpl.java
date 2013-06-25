@@ -9,6 +9,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -428,6 +429,22 @@ public class QuizDAOImpl implements QuizDAO{
 		}
 		
 		return questionAnswerToEdit;
+	}
+
+	@Override
+	public List<UserResult> getUserResultsByDate(Date selectedDate) {
+		Date finishedDate = new Date(selectedDate.getTime());
+		selectedDate.setHours(0);
+		selectedDate.setMinutes(0);
+		selectedDate.setSeconds(0);
+		finishedDate.setHours(23);
+		finishedDate.setMinutes(59);
+		finishedDate.setSeconds(59);
+		List<UserResult> resultList = null;
+		
+		resultList = currentSession().createCriteria(UserResult.class).add(Restrictions.between("startTime", selectedDate.getTime(), finishedDate.getTime())).addOrder(Order.asc("compIp")).list();
+		
+		return resultList;
 	}
 
 

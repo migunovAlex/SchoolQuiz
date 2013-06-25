@@ -1,5 +1,6 @@
 package com.schoolquiz.persistence;
 
+import java.util.Date;
 import java.util.List;
 
 import com.schoolquiz.entity.Answer;
@@ -76,6 +77,8 @@ public interface QuizDAO {
 	public QuestionAnswer getQuestionAnswer(long l);
 
 	public QuestionAnswer updateQuestionAnswer(QuestionAnswer questionAnswerToEdit);
+
+	public List<UserResult> getUserResultsByDate(Date selectedDate);
 	
 //	public List<UserAnswer> getUserAnswersForQuestion();
 

@@ -33,6 +33,7 @@ import com.schoolquiz.entity.admin.request.GetGroupsDictRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionGroupRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionRequest;
 import com.schoolquiz.entity.admin.request.GetQuestionsForGroup;
+import com.schoolquiz.entity.admin.request.GetUserResultsRequest;
 import com.schoolquiz.entity.admin.request.GroupRequest;
 import com.schoolquiz.entity.admin.request.RemoveAnswersFromQuestionRequest;
 import com.schoolquiz.entity.admin.request.UserCredentials;
@@ -49,6 +50,7 @@ import com.schoolquiz.entity.admin.response.GetGroupsDictResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionGroupResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionResponse;
 import com.schoolquiz.entity.admin.response.GetQuestionsForGroupResponse;
+import com.schoolquiz.entity.admin.response.GetUserResultsResponse;
 import com.schoolquiz.entity.admin.response.RemoveAnswersFromQuestionResponse;
 import com.schoolquiz.service.AdminUserService;
 import com.schoolquiz.service.QuizService;
@@ -224,5 +226,11 @@ public class AdministrationController {
 	public @ResponseBody EditAnswersFromQuestionResponse editAnswersFromQuestion(@RequestBody EditAnswersFromQuestionRequest editAnswersFromQuestionRequest){
 		return adminService.editAnswerFromQuestion(editAnswersFromQuestionRequest);
 	}
+	
+	@RequestMapping(value="/getUserResults", method=RequestMethod.POST)
+	public @ResponseBody GetUserResultsResponse getUserResults(@RequestBody GetUserResultsRequest getUserResultsRequest){
+		return adminService.getUsersResults(getUserResultsRequest);
+	}
+	
 
 }

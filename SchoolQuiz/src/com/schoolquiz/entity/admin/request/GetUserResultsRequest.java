@@ -1,0 +1,23 @@
+package com.schoolquiz.entity.admin.request;
+
+public class GetUserResultsRequest {
+	
+	private String userSession;
+	private String resultDate;
+	
+	public String getUserSession() {
+		return userSession;
+	}
+	public void setUserSession(String userSession) {
+		this.userSession = userSession;
+	}
+	public String getResultDate() {
+		return resultDate;
+	}
+	public void setResultDate(String resultDate) {
+		this.resultDate = resultDate;
+	}
+	
+	
+
+}

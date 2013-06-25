@@ -555,6 +555,12 @@
 				location=loc;
 			}
 		
+		function getResults(){
+			var userSession = $.cookie("ADMIN_SESSION");
+			var loc = $.cookie("SERVER_HOST")+"pages/resultsPage?userSession="+userSession;
+			location=loc;
+		}
+		
 		function getMain(){
 			var userSession = $.cookie("ADMIN_SESSION");
 			var loc = $.cookie("SERVER_HOST")+"pages/main?userSession="+userSession;
@@ -589,7 +595,7 @@
 								<td>
 									<tr>
 										<li class="yellow">
-											<p><a href="#">Просмотр результатов</a></p>
+											<p><a href="#" onClick="getResults()">Просмотр результатов</a></p>
 										</li>
 									</tr>
 								</td>
